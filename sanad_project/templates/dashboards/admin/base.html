@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>SANAD Admin</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<div class="shell">
+  {% include 'dashboards/admin/partials/sidebar.html' %}
+  <div class="main">
+    {% include 'dashboards/admin/partials/topbar.html' %}
+    <div class="content">
+
+      {% if messages %}
+        <div class="messages">
+          {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% include 'dashboards/admin/panels/panelDashboard.html' %}
+      {% include 'dashboards/admin/panels/panelUser.html' %}
+      {% include 'dashboards/admin/panels/panelClient.html' %}
+      {% include 'dashboards/admin/panels/panelDocument.html' %}
+      {% include 'dashboards/admin/panels/panelLog.html' %}
+      {% include 'dashboards/admin/panels/panelParam.html' %}
+
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  {% include 'dashboards/admin/modals/modalUser.html' %}
+  {% include 'dashboards/admin/modals/modalClient.html' %}
+  {% include 'dashboards/admin/modals/modalDoc.html' %}
+  {% include 'dashboards/admin/modals/modalDossier.html' %}
+</div>
+
+<script src="{% static 'js/files.js' %}"></script>
+
+{% if open_modal %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => openModal('{{ open_modal }}'));
+</script>
+{% endif %}
+
+</body>
+</html>

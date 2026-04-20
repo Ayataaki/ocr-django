@@ -1,0 +1,92 @@
+  <div class="modal" id="modal-add-user" style="display:none">
+    <div class="modal-head">
+      <h3>Nouvel utilisateur</h3>
+      <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- <div class="form-grid">
+
+        <div class="field full">
+          <label>Nom complet</label>
+          <input placeholder="Prénom Nom"/>
+        </div>
+        <div class="field">
+          <label>Identifiant</label>
+          <input placeholder="prenom.nom"/>
+        </div>
+        <div class="field">
+          <label>Rôle</label>
+          <select>
+            <option>Opérateur</option>
+            <option>Administrateur</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Mot de passe</label>
+          <input type="password" placeholder="••••••••"/>
+        </div>
+      </div> -->
+
+      <div class="form-grid">
+
+      <form method="POST" action="{% url 'ajout_utilisateur' %}">
+        {% csrf_token %}
+
+        <div class="field">
+          <label for="nom">Nom :</label>
+          <input type="text" name="nom">
+        </div>
+        
+        <div class="field">
+          <label for="prenom">Prénom :</label>
+          <input type="text" name="prenom" >
+        </div>
+        
+        <div class="field">
+          <label for="email">Email :</label>
+          <input type="email" name="email" value="{{ utilisateur.email|default:'' }}">
+        </div>
+
+        <div class="field">
+          <label for="password">Mot de passe :</label>
+          <input type="password" name="mot_de_passe">
+        </div>
+
+        
+        <div class="field">
+        <label for="cin">CIN :</label>
+        <input type="text" name="cin">
+        </div>
+
+        <div class="field">
+        <label for="telephone">Téléphone :</label>
+        <input type="text" name="telephone" value="{{ utilisateur.telephone|default:'' }}">
+        </div>
+
+        <!-- A modifier !!!! -->
+         <div class="field">
+        <label for="role">Rôle :</label>
+        <input type="text" name="role" value="{{ utilisateur.role|default:'' }}">
+        </div>
+
+      </div>
+
+        <!-- <button type="submit">Enregistrer</button> -->
+         
+            <div class="modal-foot">
+              <button type="submit" class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+              <button class="btn btn-primary">Créer</button>
+            </div>
+
+      </form>
+
+    </div>
+    
+    <!-- <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary">Créer</button>
+    </div> -->
+
+  </div>

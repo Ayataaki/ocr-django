@@ -1,0 +1,93 @@
+
+
+<button onclick="openModal()">Ajouter un client</button>
+
+  <div class="modal" id="modal-add-client" style="display:none">
+    
+    <div class="modal-head">
+      <h3>Nouveau client</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        
+      <form method="POST" action="{% url 'ajout_client' %}">
+        {% csrf_token %}
+
+        <div class="field">
+          <label>Nom</label>
+          <input name="nom" placeholder="Nom de famille"/>
+        </div>
+
+        <div class="field">
+          <label>Prénom</label>
+          <input placeholder="Prénom"/>
+        </div>
+
+        <!-- à rendre select et obligatoire -->
+        <div class="field">
+          <label>Type d'identité</label>
+          <select name="type_identite" required>
+            <option value="">Sélectionnez un type</option>
+            <option value="CIN">CIN</option>
+            <option value="RC">Passeport</option>
+
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Numéro d'identité</label>
+          <input name="numero_identite" placeholder="AB123456"/>
+        </div>
+
+        <div class="field">
+          <label>Téléphone</label>
+          <input name="telephone" placeholder="06 XX XX XX XX"/>
+        </div>
+        
+        <div class="field full">
+          <label>Adresse</label>
+          <input name="adresse" placeholder="Adresse complète"/>
+        </div>
+        
+        <div class="field">
+          <label>Email</label>
+          <input name="email" type="email" placeholder="email@exemple.ma"/>
+        </div>
+        
+        <div class="field">
+          <label>Type</label>
+          <select>
+            <option>Personne physique</option>
+            <option>Personne morale</option>
+          </select>        
+        </div>
+
+        <div class="field">
+          <label>Profession</label>
+          <input name="profession" placeholder="Profession"/>
+        </div>
+
+        
+        <div class="field">
+          <label>Date de naissance</label>
+          <input name="date_naissance" type="date" placeholder="Date de naissance"/>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+          <button type="submit" class="btn btn-primary">Créer le client</button>
+        </div>
+      
+        </form>
+      </div>
+    
+  </div>
+
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary">Créer le client</button>
+    </div>
+
+  </div>

@@ -1,0 +1,157 @@
+    <!-- ── DASHBOARD ── -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-row">
+        <div class="stat blue">
+          <div class="stat-val">247</div>
+          <div class="stat-label">Documents</div>
+          <div class="stat-change up">↑ +18 cette semaine</div>
+        </div>
+        <div class="stat green">
+          <div class="stat-val">83</div>
+          <div class="stat-label">Clients actifs</div>
+          <div class="stat-change up">↑ +3 nouveaux</div>
+        </div>
+        <div class="stat amber">
+          <div class="stat-val">12</div>
+          <div class="stat-label">En attente OCR</div>
+          <div class="stat-change warn">⚠ 2 en erreur</div>
+        </div>
+        <div class="stat purple">
+          <div class="stat-val">9</div>
+          <div class="stat-label">Utilisateurs</div>
+          <div class="stat-change">2 admins · 7 opérateurs</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head">
+            <h3>Derniers dossiers</h3>
+            <button class="btn btn-ghost btn-sm" onclick="show('documents',document.querySelector('[onclick*=documents]'))">Voir tout</button>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Type</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for dossier in dossiers %}
+                <tr class="tr-click">
+                  <td>{{ dossier.client.nom }} {{ dossier.client.prenom }}</td>
+                  <td>{{ dossier.reference_dossier }}</td>
+                  <td>
+                    <!-- <span class="badge badge-green">{{ dossier.statut }}</span> -->
+                    {{ dossier.statut }}
+                  </td>
+                </tr>
+                {% endfor %}
+
+                <!-- <tr class="tr-click">
+                  <td>TAZI M.</td>
+                  <td>Titre foncier</td>
+                  <td><span class="badge badge-amber">OCR en cours</span></td>
+                </tr>
+                <tr class="tr-click">
+                  <td>CHRAIBI S.</td>
+                  <td>Contrat vente</td>
+                  <td><span class="badge badge-green">Indexé</span></td>
+                </tr>
+                <tr class="tr-click">
+                  <td>OUALI F.</td>
+                  <td>Procuration</td>
+                  <td><span class="badge badge-red">Erreur scan</span></td>
+                </tr> -->
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>Derniers clients</h3>
+            <button class="btn btn-ghost btn-sm" onclick="show('clients',document.querySelector('[onclick*=clients]'))">Voir tout</button>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nom client</th>
+                  <th>Profession</th>
+                  <th>Type identité</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for client in clients %}
+                <tr class="tr-click">
+                  <td>{{ client.nom }} {{ client.prenom }}</td>
+                  <td>{{ client.profession }}</td>
+                  <td>{{ client.type_identite }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>Derniers documents</h3>
+            <button class="btn btn-ghost btn-sm" onclick="show('documents',document.querySelector('[onclick*=documents]'))">Voir tout</button>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Type</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for dossier in dossiers %}
+                <tr class="tr-click">
+                  <td>{{ dossier.client.nom }} {{ dossier.client.prenom }}</td>
+                  <td>{{ dossier.reference_dossier }}</td>
+                  <td>
+                    <!-- <span class="badge badge-green">{{ dossier.statut }}</span> -->
+                    {{ dossier.statut }}
+                  </td>
+                </tr>
+                {% endfor %}
+
+                <!-- <tr class="tr-click">
+                  <td>TAZI M.</td>
+                  <td>Titre foncier</td>
+                  <td><span class="badge badge-amber">OCR en cours</span></td>
+                </tr>
+                <tr class="tr-click">
+                  <td>CHRAIBI S.</td>
+                  <td>Contrat vente</td>
+                  <td><span class="badge badge-green">Indexé</span></td>
+                </tr>
+                <tr class="tr-click">
+                  <td>OUALI F.</td>
+                  <td>Procuration</td>
+                  <td><span class="badge badge-red">Erreur scan</span></td>
+                </tr> -->
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Accès récents</h3></div>
+          <div class="card-body">
+            <div class="log-item"><div class="log-dot" style="background:var(--green)"></div><div class="log-time">09:14</div><div class="log-msg">Connexion réussie</div><div class="log-user">k.harraqi</div></div>
+            <div class="log-item"><div class="log-dot" style="background:var(--amber)"></div><div class="log-time">08:52</div><div class="log-msg">Export document</div><div class="log-user">m.tazi</div></div>
+            <div class="log-item"><div class="log-dot" style="background:var(--red)"></div><div class="log-time">08:31</div><div class="log-msg">Tentative échouée</div><div class="log-user">inconnu</div></div>
+            <div class="log-item"><div class="log-dot" style="background:var(--green)"></div><div class="log-time">07:58</div><div class="log-msg">Nouveau client ajouté</div><div class="log-user">s.admin</div></div>
+          </div>
+        </div>
+      </div>
+    </div>

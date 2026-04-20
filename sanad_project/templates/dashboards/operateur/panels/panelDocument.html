@@ -1,0 +1,52 @@
+<!-- ── DOCUMENTS ── -->
+ <div class="panel {% if active_panel == 'documents' %}active{% endif %}" id="panel-documents">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+
+    <!-- <div class="panel" id="panel-documents">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"> -->
+        <div style="font-size:13px;color:var(--text2)">247 documents · filtrés par date</div>
+        <button class="btn btn-primary" onclick="openModal('add-doc')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Nouveau document
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Statut</th>
+                <th>Type</th>
+                <th>Date création</th>
+                <th>Date modification</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- {% for doc in documents %}
+              <tr>
+                <td>{{ doc.titre }}</td>
+                <td>{{ doc.statut }}</td>
+                <td>{{ doc.type }}</td>
+                <td>{{ doc.date_creation }}</td>
+                <td>{{ doc.date_modification }}</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-ghost btn-icon btn-sm">👁</button>
+                    <button class="btn btn-ghost btn-icon btn-sm">✎</button> -->
+                    <!-- Pas de suppression si on ne vérifie pas que ce client n'a pas de dossier !! -->
+                    <!-- <button class="btn btn-danger btn-icon btn-sm">✕</button>
+                  </div>
+                </td>                
+              </tr>
+              {% endfor %} -->
+              <tr class="tr-click"><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">DN-2026-0141</td><td>BENALI K.</td><td>Acte notarié</td><td>Me. Harraqi</td><td style="color:var(--text3)">Aujourd'hui</td><td><span class="badge badge-green">Indexé</span></td><td><div class="actions"><button class="btn btn-ghost btn-icon btn-sm">⤓</button><button class="btn btn-ghost btn-icon btn-sm">✎</button><button class="btn btn-danger btn-icon btn-sm">✕</button></div></td></tr>
+              <tr class="tr-click"><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">DN-2026-0140</td><td>TAZI M.</td><td>Titre foncier</td><td>Me. Alami</td><td style="color:var(--text3)">Hier</td><td><span class="badge badge-amber">OCR en cours</span></td><td><div class="actions"><button class="btn btn-ghost btn-icon btn-sm">⤓</button><button class="btn btn-ghost btn-icon btn-sm">✎</button><button class="btn btn-danger btn-icon btn-sm">✕</button></div></td></tr>
+              <tr class="tr-click"><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">DN-2026-0139</td><td>CHRAIBI S.</td><td>Contrat vente</td><td>Me. Harraqi</td><td style="color:var(--text3)">Hier</td><td><span class="badge badge-green">Indexé</span></td><td><div class="actions"><button class="btn btn-ghost btn-icon btn-sm">⤓</button><button class="btn btn-ghost btn-icon btn-sm">✎</button><button class="btn btn-danger btn-icon btn-sm">✕</button></div></td></tr>
+              <tr class="tr-click"><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">DN-2026-0138</td><td>OUALI F.</td><td>Procuration</td><td>Me. Alami</td><td style="color:var(--text3)">06/04</td><td><span class="badge badge-red">Erreur scan</span></td><td><div class="actions"><button class="btn btn-ghost btn-icon btn-sm">⤓</button><button class="btn btn-ghost btn-icon btn-sm">✎</button><button class="btn btn-danger btn-icon btn-sm">✕</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>

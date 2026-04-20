@@ -1,0 +1,46 @@
+
+  <div class="modal" id="modal-add-doc" style="display:none">
+    <div class="modal-head">
+      <h3>Nouveau document</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Client</label>
+          <select>
+            <option>BENALI Khalid</option>
+            <option>TAZI Meryem</option>
+            <option>IMMO CHRAIBI SARL</option>
+          </select>
+        </div>
+        
+        <div class="field">
+          <label>Type de document</label>
+          <select>
+            <option>Acte notarié</option>
+            <option>Titre foncier</option>
+            <option>Contrat vente</option>
+            <option>Procuration</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Notaire</label>
+          <input placeholder="Me. Harraqi"/>
+        </div>
+
+        <div class="field full">
+          <label>Fichier PDF</label>
+          <input type="file" accept=".pdf" style="padding:6px"/>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary">Téléverser</button>
+    </div>
+  </div>

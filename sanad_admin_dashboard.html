@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SANAD</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+{% include 'dashboards/admin/partials/sidebar.html' %}
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  {% include 'dashboards/admin/partials/topbar.html' %}
+
+
+
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    {% include 'dashboards/admin/panels/panelDashboard.html' %}
+
+    <!-- ── UTILISATEURS ── -->
+    {% include 'dashboards/admin/panels/panelUse.html' %}
+
+    <!-- ── DOCUMENTS ── -->
+    {% include 'dashboards/admin/panels/panelDocument.html' %}
+
+    <!-- ── CLIENTS ── -->
+    {% include 'dashboards/admin/panels/panelClient.html' %}
+
+    <!-- ── JOURNAL ── -->
+    {% include 'dashboards/admin/panels/panelLog.html' %}
+
+    <!-- ── PARAMETRES ── -->
+    {% include 'dashboards/admin/panels/panelParam.html' %}
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ── MODALS OVERLAY ── -->
+<div class="overlay" id="overlay">
+
+  <!-- ADD USER -->
+  {% include 'dashboards/admin/modals/modalUser.html' %}
+
+  <!-- ADD CLIENT -->
+  {% include 'dashboards/admin/modals/modalClient.html' %}
+
+  <!-- ADD DOC -->
+  {% include 'dashboards/admin/modals/modalDoc.html' %}
+
+  <!-- ADD DOSSIER -->
+  {% include 'dashboards/admin/modals/modalDossier.html' %}
+
+</div>
+</body>

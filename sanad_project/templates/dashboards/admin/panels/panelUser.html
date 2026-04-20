@@ -1,0 +1,73 @@
+
+    <!-- ── UTILISATEURS ── -->
+
+    <div class="panel {% if active_panel == 'utilisateurs' %}active{% endif %}" id="panel-utilisateurs">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+ 
+
+    <!-- <div class="panel" id="panel-utilisateurs"> -->
+      
+      <!-- <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"> -->
+        
+        <div style="font-size:13px;color:var(--text2)">
+          {{ utilisateurs.count }} utilisateurs enregistrés
+        </div>
+        
+        <button class="btn btn-primary" onclick="openModal('add-user')">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Nouvel utilisateur
+        </button>
+
+        <!-- A revoir , puisqu'on peut mettre une liste des roles !!!!!  -->
+        <button class="btn btn-primary" onclick="openModal('add-role')">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Nouvel role
+        </button>
+      
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in utilisateurs %}
+              <tr>
+                <td>{{ user.nom }}</td>
+                <td>{{ user.prenom }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role.nom }}</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-ghost btn-icon btn-sm">
+                      👁
+                    </button>
+                    <button class="btn btn-ghost btn-icon btn-sm">
+                      ✎
+                    </button>
+                    <!-- Pas de suppression si on ne vérifie pas que ce client n'a pas de dossier !! -->
+                    <button class="btn btn-danger btn-icon btn-sm">
+                      ✕
+                    </button>
+                  </div>
+                </td>
+                <!-- <th>Actions</th> -->
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
