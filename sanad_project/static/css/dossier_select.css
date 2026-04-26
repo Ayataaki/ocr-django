@@ -1,0 +1,339 @@
+/* ── États ── */
+.dossier-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text2);
+  padding: 4px 0;
+}
+
+/* Spinner */
+.dossier-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Vide */
+.dossier-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--bg3);
+  border: 1px dashed var(--border2);
+  border-radius: var(--rad-lg);
+  padding: 24px;
+  width: 100%;
+  color: var(--text3);
+  font-size: 13px;
+}
+
+/* Erreur */
+.dossier-error {
+  background: rgba(240, 73, 96, .08);
+  border: 1px solid rgba(240, 73, 96, .2);
+  border-radius: var(--rad);
+  padding: 10px 14px;
+  color: var(--red);
+  font-size: 12px;
+}
+
+/* Fiche dossier sélectionné */
+.dossier-fiche {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--rad);
+  padding: 12px 16px;
+  animation: fadeSlide .15s ease;
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dossier-fiche-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.dossier-fiche-row:last-child { margin-bottom: 0; }
+
+.dossier-fiche-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 120px;
+}
+
+.dossier-fiche-field.full { flex: 1; width: 100%; }
+
+.dossier-fiche-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+.dossier-fiche-value {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.dossier-fiche-value.mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* Bouton nouveau dossier */
+.btn-dossier-new {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px dashed var(--border2);
+  border-radius: var(--rad);
+  color: var(--text2);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  justify-content: center;
+  transition: all .15s;
+}
+
+.btn-dossier-new:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-glow, rgba(59,111,255,.06));
+}
+
+/* Badges statut */
+.badge-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.badge-statut::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.badge-statut.actif    { background:rgba(34,201,122,.12); color:var(--green); }
+.badge-statut.actif::before   { background: var(--green); }
+.badge-statut.cloture  { background:var(--bg4,var(--bg3)); color:var(--text3); }
+.badge-statut.cloture::before { background: var(--text3); }
+.badge-statut.archive  { background:var(--bg4,var(--bg3)); color:var(--text3); }
+.badge-statut.archive::before { background: var(--text3); }
+.badge-statut.suspendu { background:rgba(245,158,27,.12); color:var(--amber); }
+.badge-statut.suspendu::before{ background: var(--amber); }
+
+
+
+/* ══════════════════════════════════════════
+   dossier_select.css
+   Styles pour la section dossier du panel
+   Même convention que client_detail.css
+════════════════════════════════════════════ */
+
+/* ── États ── */
+.dossier-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text2);
+  padding: 4px 0;
+}
+
+/* ── Spinner ── */
+.dossier-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border2, #3a4565);
+  border-top-color: var(--accent, #3b6fff);
+  border-radius: 50%;
+  animation: dossier-spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes dossier-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── État vide ── */
+.dossier-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--bg3);
+  border: 1px dashed var(--border2, #3a4565);
+  border-radius: var(--rad-lg, 12px);
+  padding: 28px 20px;
+  color: var(--text3);
+  font-size: 13px;
+  gap: 10px;
+}
+
+/* ── État erreur ── */
+.dossier-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(240, 73, 96, .08);
+  border: 1px solid rgba(240, 73, 96, .2);
+  border-radius: var(--rad, 8px);
+  padding: 10px 14px;
+  color: var(--red, #f04960);
+  font-size: 12px;
+}
+
+/* ── Fiche dossier sélectionné ── */
+.dossier-fiche {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--rad, 8px);
+  padding: 14px 16px;
+  animation: dossier-fadein .15s ease;
+}
+
+@keyframes dossier-fadein {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dossier-fiche-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dossier-fiche-ref {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dossier-fiche-body {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.dossier-fiche-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dossier-fiche-field.full {
+  grid-column: 1 / -1;
+}
+
+.dossier-fiche-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+.dossier-fiche-value {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.dossier-fiche-value.mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent, #3b6fff);
+}
+
+/* ── Bouton reset de la fiche ── */
+.dossier-fiche-reset {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color .15s, background .15s;
+}
+
+.dossier-fiche-reset:hover {
+  color: var(--red, #f04960);
+  background: rgba(240, 73, 96, .08);
+}
+
+/* ── Badges statut ── */
+.badge-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 100px;
+  letter-spacing: .03em;
+}
+
+.badge-statut::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-statut.actif {
+  background: rgba(34, 201, 122, .12);
+  color: var(--green, #22c97a);
+}
+.badge-statut.actif::before    { background: var(--green, #22c97a); }
+
+.badge-statut.cloture {
+  background: var(--bg4, var(--bg3));
+  color: var(--text3);
+}
+.badge-statut.cloture::before  { background: var(--text3); }
+
+.badge-statut.archive {
+  background: var(--bg4, var(--bg3));
+  color: var(--text3);
+}
+.badge-statut.archive::before  { background: var(--text3); }
+
+.badge-statut.suspendu {
+  background: rgba(245, 158, 27, .12);
+  color: var(--amber, #f59e1b);
+}
+.badge-statut.suspendu::before { background: var(--amber, #f59e1b); }

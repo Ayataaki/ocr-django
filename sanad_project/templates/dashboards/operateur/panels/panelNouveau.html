@@ -1,0 +1,136 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/dossier_select.css' %}">
+
+<div class="form-section" id="section-dossier" style="display:none">
+
+  <div class="form-section-title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.5">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0
+               0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+    </svg>
+    Dossier
+  </div>
+
+  <!-- État : chargement -->
+  <div id="dossier-loading" class="dossier-state" style="display:none">
+    <div class="dossier-spinner"></div>
+    <span>Chargement des dossiers...</span>
+  </div>
+
+  <!-- État : dossiers trouvés -->
+  <div id="dossier-found" class="dossier-state" style="display:none">
+    <div class="form-grid">
+
+      <div class="field" style="grid-column:1/-1">
+        <label for="dossier-select">
+          Sélectionner un dossier existant
+        </label>
+        <select id="dossier-select" name="dossier_id"
+                onchange="DossierSelect.onSelect(this)">
+          <option value="">-- Choisir un dossier --</option>
+          <!-- Options injectées par dossier_select.js -->
+        </select>
+      </div>
+        <div class="field full-width">
+            <label>Dossiers du client</label>
+            <select id="dossier-select"></select>
+        </div>
+
+      <!-- Fiche du dossier sélectionné -->
+      <div id="dossier-fiche" class="dossier-fiche"
+           style="display:none;grid-column:1/-1">
+
+        <div class="dossier-fiche-row">
+          <div class="dossier-fiche-field">
+            <span class="dossier-fiche-label">Référence</span>
+            <span class="dossier-fiche-value mono"
+                  data-field="reference"></span>
+          </div>
+          <div class="dossier-fiche-field">
+            <span class="dossier-fiche-label">Statut</span>
+            <span class="dossier-fiche-value"
+                  data-field="statut-badge"></span>
+          </div>
+          <div class="dossier-fiche-field">
+            <span class="dossier-fiche-label">Date acte</span>
+            <span class="dossier-fiche-value"
+                  data-field="date_acte"></span>
+          </div>
+        </div>
+
+        <div class="dossier-fiche-row">
+          <div class="dossier-fiche-field full">
+            <span class="dossier-fiche-label">Description</span>
+            <span class="dossier-fiche-value"
+                  data-field="description"></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bouton nouveau dossier quand un client est chargé -->
+      <div style="grid-column:1/-1">
+        <button type="button" class="btn-dossier-new"
+                onclick="openModal('add-dossier')">
+          <svg viewBox="0 0 24 24" fill="currentColor"
+               style="width:13px;height:13px">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Ouvrir un nouveau dossier pour ce client
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- État : aucun dossier -->
+  <div id="dossier-empty" class="dossier-state" style="display:none">
+    <div class="dossier-empty-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.5" style="width:28px;height:28px;
+           opacity:.4;margin-bottom:8px">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0
+                 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      <p>Ce client n'a pas encore de dossier.</p>
+      <button type="button" class="btn btn-primary btn-sm"
+              onclick="openModal('add-dossier')">
+        Créer le premier dossier
+      </button>
+    </div>
+  </div>
+
+  <!-- État : erreur -->
+  <div id="dossier-error" class="dossier-state dossier-error"
+       style="display:none">
+    Impossible de charger les dossiers.
+    <button type="button" class="btn btn-ghost btn-sm"
+            onclick="DossierSelect.retry()">
+      Réessayer
+    </button>
+  </div>
+
+</div>
+
+<script src="{% static 'js/dossier_select.js' %}"></script>
+<script>
+function loadDossiers(clientId) {
+  fetch(`/accounts/clients/${clientId}/dossiers/`)
+    .then(r => r.json())
+    .then(data => {
+      const select = document.getElementById("dossier-select");
+      select.innerHTML = "";
+      data.forEach(dossier => {
+        const opt = document.createElement("option");
+        opt.value = dossier.id;
+        opt.textContent = dossier.reference_dossier;
+        select.appendChild(opt);
+      });
+    })
+    .catch(err => console.error("Erreur chargement dossiers:", err));
+}
+</script>

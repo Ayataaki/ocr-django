@@ -19,6 +19,7 @@ const titles = {
   utilisateurs:'Utilisateurs',
   documents:'Documents',
   clients:'Clients',
+  nvDoc:'Nouveau document',
   nouveau:'Nouveau dossier',
   journal:"Journal d'accès",
   parametres:"Paramètres",
@@ -61,7 +62,6 @@ function showScreen(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.getElementById(s+'-screen').classList.add('active');
 }
-function logout(){showScreen('login')}
 
 function switchPanel(screen,panel){
   document.querySelectorAll('#'+screen+'-screen .panel').forEach(p=>p.classList.remove('active'));
@@ -93,9 +93,6 @@ function showModal(id){
   const m=document.getElementById('modal-'+id);
   if(m)m.style.display='block';
 }
-// function closeModal(){
-//   document.getElementById('modal-overlay').style.display='none';
-// }
 
 function doSearch(q){
   if(!q.trim()){return}

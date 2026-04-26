@@ -5,7 +5,7 @@
       <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
     </div>
     
-    <form method="POST" action="{% url 'ajout_dossier' %}">
+    <form method="POST" action="{% url 'ajout_dossier_operateur' %}">
     {% csrf_token %}
 
     <div class="modal-body">
@@ -19,9 +19,18 @@
         <!-- un meme client peut avoir le meme nom et prenom et donc il faut identifier !!  -->
         <div class="field full">
           <label>Client</label>
-          <select name="client">
+          <select id="client-select" style="flex:1" onchange="ClientDetail.load(this.value)">
+          <option value="">-- Choisir --</option>
           {% for client in clients %}
-            <option value="{{ client.id }}">{{ client.nom }} {{ client.prenom }}-{{ client.numero_identite }}</option>
+          <option value="{{ client.id }}">
+            {% if client.personne_physique %}
+            {{ client.personne_physique.nom }} {{ client.personne_physique.prenom }}
+            — {{ client.personne_physique.numero_identite }}
+            {% elif client.personne_morale %}
+            {{ client.personne_morale.raison_sociale }}
+            — {{ client.personne_morale.ice|default:client.personne_morale.numero_rc }}
+            {% endif %}
+          </option>
           {% endfor %}
           </select>
         </div>
@@ -30,35 +39,6 @@
           <label>Description du dossier</label>
           <input name="description" placeholder="Description du dossier"/>
         </div>
-
-        <!-- <div class="field">
-          <label>Type d'acte</label>
-          <select>
-            <option>Acte notarié</option>
-            <option>Titre foncier</option>
-            <option>Succession</option>
-            <option>Autre</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Type d'acte</label>
-          <select>
-            <option>Acte notarié</option>
-            <option>Titre foncier</option>
-            <option>Succession</option>
-            <option>Autre</option>
-          </select>
-        </div> 
-
-        <div class="field">
-          <label>Opérateur assigné</label>
-          <select>
-            <option>k.harraqi</option>
-            <option>m.tazi</option>
-          </select>
-        </div> -->
-
         
         <div class="field">
           <label>Statut</label>

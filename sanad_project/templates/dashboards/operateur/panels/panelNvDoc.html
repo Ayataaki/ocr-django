@@ -1,0 +1,673 @@
+<!-- ENHANCED PANEL: Ajouter un document -->
+<div class="panel {% if active_panel == 'nvDoc' %}active{% endif %}" id="panel-nvDoc">
+    <div class="card">
+        <div class="card-body">
+            <!-- Modernized Header -->
+            <div class="enhanced-section-header">
+                <div class="enhanced-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <path d="M12 18v-4" />
+                        <path d="M8 18v-4" />
+                        <path d="M16 18v-4" />
+                    </svg>
+                </div>
+                <div class="enhanced-section-text">
+                    <span class="enhanced-section-title">Ajouter un document</span>
+                    <span class="enhanced-section-subtitle">Numérisez et indexez un nouveau document</span>
+                </div>
+            </div>
+
+            <!-- Client Recherche Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                        <path d="M22 22l-3-3" />
+                    </svg>
+                    Client
+                </div>
+                <div class="form-grid">
+                    <div class="field full-width">
+                        <label>Rechercher un client</label>
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                </svg>
+                                <input type="text"
+                                       id="client-search"
+                                       class="search-input"
+                                       placeholder="Nom, prénom ou numéro d'identité...">
+                            </div>
+                            <input type="hidden" id="client-id">
+                            <div id="client-results" class="search-results"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dossier Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    Dossier associé
+                </div>
+                <div class="form-grid">
+                    <div class="field full-width">
+                        <label>Sélectionner un dossier</label>
+                        <div class="select-with-button">
+                            <select id="dossier-select" class="modern-select">
+                                <option value="">Sélectionnez un client d'abord</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" onclick="openModal('add-dossier')">
+                                + Nouveau dossier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Upload Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Document source
+                </div>
+                <div class="enhanced-upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </div>
+                    <p>Cliquez pour sélectionner un fichier</p>
+                    <small>PDF, JPG, PNG — max 50 Mo</small>
+                    <input type="file" id="file-input" style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <div id="file-preview" style="display: none;" class="file-preview-card"></div>
+            </div>
+
+            <!-- OCR Result Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 7V4h16v3" />
+                        <path d="M9 20h6" />
+                        <path d="M12 4v16" />
+                        <path d="M8 12h8" />
+                    </svg>
+                    Texte extrait (OCR)
+                </div>
+                <div class="field full-width">
+                    <textarea id="ocr-text" class="ocr-textarea" rows="4" placeholder="Le texte extrait automatiquement apparaîtra ici..."></textarea>
+                </div>
+            </div>
+
+            <!-- Keywords Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                    Mots-clés
+                </div>
+                <div class="field full-width">
+                    <label>Mots-clés manuels</label>
+                    <input type="text" id="keywords" class="keywords-input" placeholder="Séparez les mots-clés par des virgules...">
+                    <div id="auto-keywords-section" style="display: none; margin-top: 12px;">
+                        <div class="auto-keywords-label">Mots-clés suggérés par OCR :</div>
+                        <div class="keyword-tags-list" id="suggested-keywords"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" class="btn btn-ghost" onclick="switchPanel('op','dashboard')">
+                    Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" onclick="uploadDocument()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    Enregistrer le document
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ============================================
+       ENHANCED AJOUTER DOCUMENT CSS
+       Styles cohérents avec le premier panel
+    ============================================ */
+
+    /* Search Container */
+    .search-container {
+        position: relative;
+        width: 100%;
+    }
+    .search-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        width: 18px;
+        height: 18px;
+        stroke: var(--text3);
+        pointer-events: none;
+    }
+    .search-input {
+        width: 100%;
+        padding: 10px 12px 10px 38px;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 13px;
+        transition: all 0.2s ease;
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .search-input::placeholder {
+        color: var(--text3);
+    }
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 4px;
+        max-height: 240px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .search-result-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        color: var(--text2);
+    }
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+    .search-result-item:hover {
+        background: var(--bg3);
+        color: var(--text);
+    }
+    .search-result-item .client-name {
+        font-weight: 500;
+        color: var(--text);
+    }
+    .search-result-item .client-id {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+    }
+
+    /* Modern Select */
+    .modern-select {
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .modern-select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .modern-select option {
+        background: var(--bg2);
+        color: var(--text);
+        padding: 10px;
+    }
+
+    /* OCR Textarea */
+    .ocr-textarea {
+        width: 100%;
+        padding: 12px;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 13px;
+        font-family: 'Courier New', monospace;
+        resize: vertical;
+        transition: all 0.2s ease;
+    }
+    .ocr-textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .ocr-textarea::placeholder {
+        color: var(--text3);
+        font-family: inherit;
+    }
+
+    /* Keywords Input */
+    .keywords-input {
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 13px;
+        transition: all 0.2s ease;
+    }
+    .keywords-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .keywords-input::placeholder {
+        color: var(--text3);
+    }
+
+    /* File Preview Card */
+    .file-preview-card {
+        background: var(--bg3);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-top: 12px;
+        border: 1px solid var(--border);
+        animation: fadeIn 0.3s ease;
+    }
+    .file-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .file-details {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .file-details svg {
+        flex-shrink: 0;
+        stroke: var(--accent);
+    }
+    .file-name-text {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+    }
+    .file-size-text {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+    }
+    .remove-file-btn {
+        background: rgba(239, 68, 68, 0.1);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 8px;
+        color: var(--red);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .remove-file-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .select-with-button {
+            flex-direction: column;
+        }
+        .select-with-button button {
+            width: 100%;
+        }
+        .file-info {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .remove-file-btn {
+            align-self: flex-end;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("client-search");
+        const resultsBox = document.getElementById("client-results");
+        const hiddenId = document.getElementById("client-id");
+
+        // Input event listener for client search
+        input.addEventListener("input", function () {
+            let query = this.value.trim();
+
+            if (query.length < 2) {
+                resultsBox.innerHTML = "";
+                resultsBox.style.display = "none";
+                return;
+            }
+
+            fetch(`/accounts/clients/search/?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    resultsBox.innerHTML = "";
+                    
+                    if (data.length === 0) {
+                        let noResult = document.createElement("div");
+                        noResult.className = "search-result-item";
+                        noResult.style.color = "var(--text3)";
+                        noResult.style.cursor = "default";
+                        noResult.innerText = "Aucun client trouvé";
+                        resultsBox.appendChild(noResult);
+                    } else {
+                        data.forEach(client => {
+                            let item = document.createElement("div");
+                            item.className = "search-result-item";
+                            
+                            let nameSpan = document.createElement("div");
+                            nameSpan.className = "client-name";
+                            nameSpan.innerText = `${client.nom} ${client.prenom}`;
+                            
+                            let idSpan = document.createElement("div");
+                            idSpan.className = "client-id";
+                            idSpan.innerText = client.numero_identite || "ID: " + client.id;
+                            
+                            item.appendChild(nameSpan);
+                            item.appendChild(idSpan);
+                            
+                            item.onclick = function () {
+                                input.value = `${client.nom} ${client.prenom}`;
+                                hiddenId.value = client.id;
+                                resultsBox.innerHTML = "";
+                                resultsBox.style.display = "none";
+                                loadDossiers(client.id);
+                            };
+                            
+                            resultsBox.appendChild(item);
+                        });
+                    }
+                    
+                    resultsBox.style.display = "block";
+                })
+                .catch(err => {
+                    console.error("Erreur lors de la recherche:", err);
+                    resultsBox.innerHTML = "<div class='search-result-item' style='color: var(--red);'>Erreur lors de la recherche</div>";
+                    resultsBox.style.display = "block";
+                });
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener("click", function (e) {
+            if (!resultsBox.contains(e.target) && e.target !== input) {
+                resultsBox.style.display = "none";
+            }
+        });
+    });
+
+    function loadDossiers(clientId) {
+        let select = document.getElementById("dossier-select");
+        
+        if (!clientId) {
+            select.innerHTML = `<option value="">Sélectionnez un client d'abord</option>`;
+            return;
+        }
+        
+        select.innerHTML = `<option value="">Chargement des dossiers...</option>`;
+        select.disabled = true;
+
+        fetch(`/docs/dossiers/client/${clientId}/`)
+            .then(res => res.json())
+            .then(data => {
+                select.innerHTML = "";
+                select.disabled = false;
+                
+                if (!data || data.length === 0) {
+                    select.innerHTML = `<option value="">Aucun dossier pour ce client</option>`;
+                    return;
+                }
+                
+                // Add empty option
+                let emptyOption = document.createElement("option");
+                emptyOption.value = "";
+                emptyOption.textContent = "-- Sélectionnez un dossier --";
+                select.appendChild(emptyOption);
+                
+                data.forEach(d => {
+                    let option = document.createElement("option");
+                    option.value = d.id;
+                    option.textContent = `${d.reference_dossier}${d.statut ? ` (${d.statut})` : ''}`;
+                    select.appendChild(option);
+                });
+            })
+            .catch(err => {
+                console.error("Erreur lors du chargement des dossiers:", err);
+                select.innerHTML = `<option value="">Erreur de chargement</option>`;
+                select.disabled = false;
+            });
+    }
+
+    // File upload handler
+    document.getElementById("file-input").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        const previewDiv = document.getElementById("file-preview");
+        
+        if (file) {
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            const fileType = file.name.split('.').pop().toUpperCase();
+            
+            previewDiv.innerHTML = `
+                <div class="file-info">
+                    <div class="file-details">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <div>
+                            <div class="file-name-text">${file.name}</div>
+                            <div class="file-size-text">${fileSize} Mo • ${fileType}</div>
+                        </div>
+                    </div>
+                    <button class="remove-file-btn" onclick="removeFile()">Supprimer</button>
+                </div>
+            `;
+            previewDiv.style.display = "block";
+            
+            // Simulate OCR extraction (replace with actual OCR call)
+            simulateOCR(file.name);
+        } else {
+            previewDiv.style.display = "none";
+        }
+    });
+    
+    function removeFile() {
+        document.getElementById("file-input").value = "";
+        document.getElementById("file-preview").style.display = "none";
+        document.getElementById("ocr-text").value = "";
+        document.getElementById("auto-keywords-section").style.display = "none";
+    }
+    
+    function simulateOCR(filename) {
+        // Simulate OCR processing - replace with actual OCR API call
+        const ocrTextarea = document.getElementById("ocr-text");
+        ocrTextarea.placeholder = "Traitement OCR en cours...";
+        
+        setTimeout(() => {
+            const mockOCRText = `Document extrait de ${filename}\n\nIl s'agit d'un acte notarié concernant la vente d'un bien immobilier situé à Casablanca. Le montant de la transaction est de 2 500 000 MAD. Les parties impliquées sont Monsieur BENALI et Madame BENALI. Le numéro de titre foncier est TF-45871.`;
+            ocrTextarea.value = mockOCRText;
+            ocrTextarea.placeholder = "Texte extrait (OCR)";
+            
+            // Extract keywords from OCR text
+            extractKeywords(mockOCRText);
+        }, 2000);
+    }
+    
+    function extractKeywords(text) {
+        const keywordsSection = document.getElementById("auto-keywords-section");
+        const keywordsContainer = document.getElementById("suggested-keywords");
+        
+        // Simple keyword extraction (replace with NLP later)
+        const commonWords = ["le", "la", "les", "un", "une", "des", "et", "ou", "de", "du", "des", "est", "sont"];
+        const words = text.toLowerCase().match(/\b[a-zà-ÿ0-9]+\b/g);
+        const wordCount = {};
+        
+        words?.forEach(word => {
+            if (word.length > 3 && !commonWords.includes(word)) {
+                wordCount[word] = (wordCount[word] || 0) + 1;
+            }
+        });
+        
+        const sortedKeywords = Object.entries(wordCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8)
+            .map(entry => entry[0]);
+        
+        keywordsContainer.innerHTML = sortedKeywords
+            .map(keyword => `<span class="keyword-tag" onclick="addKeyword('${keyword}')">${keyword.toUpperCase()}</span>`)
+            .join('');
+        
+        keywordsSection.style.display = "block";
+    }
+    
+    function addKeyword(keyword) {
+        const keywordsInput = document.getElementById("keywords");
+        let currentKeywords = keywordsInput.value;
+        
+        if (currentKeywords) {
+            const keywordArray = currentKeywords.split(',').map(k => k.trim());
+            if (!keywordArray.includes(keyword)) {
+                keywordArray.push(keyword);
+                keywordsInput.value = keywordArray.join(', ');
+            }
+        } else {
+            keywordsInput.value = keyword;
+        }
+    }
+    
+    function uploadDocument() {
+        const file = document.getElementById("file-input").files[0];
+        const dossierId = document.getElementById("dossier-select").value;
+        const clientId = document.getElementById("client-id").value;
+        const ocrText = document.getElementById("ocr-text").value;
+        const keywords = document.getElementById("keywords").value;
+        
+        if (!file) {
+            alert("Veuillez sélectionner un fichier");
+            return;
+        }
+        
+        if (!clientId) {
+            alert("Veuillez sélectionner un client");
+            return;
+        }
+        
+        if (!dossierId) {
+            alert("Veuillez sélectionner un dossier");
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("dossier", dossierId);
+        formData.append("client", clientId);
+        formData.append("ocr_text", ocrText);
+        formData.append("keywords", keywords);
+        
+        const submitBtn = document.querySelector("#panel-nvDoc .btn-primary");
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg> Envoi en cours...';
+        submitBtn.disabled = true;
+        
+        fetch("/documents/upload/", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Document enregistré avec succès !");
+                switchPanel('op', 'dashboard');
+            } else {
+                alert("❌ Erreur: " + (data.error || "Erreur inconnue"));
+            }
+        })
+        .catch(err => {
+            console.error("Erreur:", err);
+            alert("❌ Erreur lors de l'envoi du document");
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    }
+    
+    function openModal(modalType) {
+        console.log(`Opening modal: ${modalType}`);
+        // Implement your modal logic here
+        if (modalType === 'add-dossier') {
+            alert("Ouvrir le modal de création de dossier");
+        }
+    }
+    
+    function switchPanel(section, panel) {
+        console.log(`Switching to ${section}/${panel}`);
+        // Implement your panel switching logic
+    }
+    
+    // Add spin animation for loading
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>

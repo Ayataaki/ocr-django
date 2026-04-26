@@ -6,29 +6,6 @@
 
     <div class="modal-body">
 
-      <!-- <div class="form-grid">
-
-        <div class="field full">
-          <label>Nom complet</label>
-          <input placeholder="Prénom Nom"/>
-        </div>
-        <div class="field">
-          <label>Identifiant</label>
-          <input placeholder="prenom.nom"/>
-        </div>
-        <div class="field">
-          <label>Rôle</label>
-          <select>
-            <option>Opérateur</option>
-            <option>Administrateur</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label>Mot de passe</label>
-          <input type="password" placeholder="••••••••"/>
-        </div>
-      </div> -->
-
       <div class="form-grid">
 
       <form method="POST" action="{% url 'ajout_utilisateur' %}">
@@ -66,10 +43,17 @@
         </div>
 
         <!-- A modifier !!!! -->
-         <div class="field">
-        <label for="role">Rôle :</label>
-        <input type="text" name="role" value="{{ utilisateur.role|default:'' }}">
+        <div class="field">
+          <label for="role">Rôle :</label>
+          <select id="role" name="role">
+            {% for role in roles %}
+              <option value="{{ role.id }}" {% if utilisateur.role.id == role.id %}selected{% endif %}>
+                {{ role.nom }}
+              </option>
+            {% endfor %}
+          </select>
         </div>
+
 
       </div>
 

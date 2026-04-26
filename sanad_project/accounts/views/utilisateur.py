@@ -17,6 +17,7 @@ def _base_context(extra=None):
         'utilisateurs': Utilisateur.objects.select_related('role').all(),
         'journal': AuditLog.objects.select_related('utilisateur').all().order_by('-date_action')[:10],  # Affiche les 10 dernières actions
         'dossiers': Dossier.objects.select_related('client').all(),
+        'roles': Role.objects.all(),
         'open_modal': None,
         'active_panel': 'utilisateurs',
     }
@@ -27,6 +28,58 @@ def _base_context(extra=None):
 
 def utilisateur_list(request):
     return render(request, "dashboards/admin/base.html", _base_context())
+
+def form_utilisateur(request):
+    roles = Role.objects.all()
+    return render(request, "auth/ajout_utilisateur.html", {"roles": roles})
+
+def admin_creation(request):
+    roles = Role.objects.all()
+    if request.method == "POST":
+        try:
+            nom = request.POST.get("nom")
+            prenom = request.POST.get("prenom")
+            nom_utilisateur = request.POST.get("nom_utilisateur")
+
+            # Nom d'utilisateur de base
+            base_username = f"{nom}.{prenom}"
+            username = base_username
+            # Vérifier si ce nom existe déjà
+            counter = 1
+            while Utilisateur.objects.filter(nom_utilisateur=username).exists():
+            # while Utilisateur.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+            email = request.POST.get("email")
+            mot_de_passe = request.POST.get("mot_de_passe")
+            cin = request.POST.get("cin")
+            telephone = request.POST.get("telephone")
+            role_id = request.POST.get("role")
+
+            if not mot_de_passe:
+                messages.error(request, "Le mot de passe est obligatoire.")
+                return render(request, "auth/ajout_utilisateur.html", {"roles": roles})
+
+            role = get_object_or_404(Role, id=role_id) if role_id else None
+
+            Utilisateur.objects.create(
+                nom_utilisateur=username,
+                nom=nom,
+                prenom=prenom,
+                email=email,
+                mot_de_passe=make_password(mot_de_passe),  # hash sécurisé
+                cin=cin,
+                telephone=telephone,
+                role=role
+            )
+            messages.success(request, "Utilisateur créé avec succès.")
+            return redirect("utilisateur_list")
+        except Exception as e:
+            print(e)
+            messages.error(request, f"Erreur lors de la création de l'utilisateur : {e}")
+            return render(request, "auth/ajout_utilisateur.html")
+    return redirect("admin_dashboard")
 
 def utilisateur_create(request):
     if request.method == "POST":

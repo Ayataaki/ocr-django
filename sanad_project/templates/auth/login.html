@@ -38,6 +38,10 @@
                 <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" required>
             </div>
 
+            {% if user %}
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+            {% endif %}
+
             <button type="submit" class="btn btn-primary w-100">Se connecter</button>
         </form>
     </div>

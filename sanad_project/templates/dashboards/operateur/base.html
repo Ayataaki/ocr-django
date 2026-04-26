@@ -4,7 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <title>SANAD Opérateur</title>
+  <!-- <link rel="stylesheet" href="{% static 'css/dossier.css' %}"> -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dossier_select.css' %}">
+  <link rel="stylesheet" href="{% static 'css/stylePanelNvDossier.css' %}">
 </head>
 <body>
 
@@ -24,8 +27,11 @@
 
       {% include 'dashboards/operateur/panels/panelDashboard.html' %}
       {% include 'dashboards/operateur/panels/panelUser.html' %}
+      {% include 'dashboards/operateur/panels/panelNvDoc.html' %}
       {% include 'dashboards/operateur/panels/panelNvDossier.html' %}
       {% include 'dashboards/operateur/panels/panelClient.html' %}
+      {% include 'dashboards/operateur/panels/panelRecherche.html' %}
+      {% include 'dashboards/operateur/panels/panelScan.html' %}
       {% include 'dashboards/operateur/panels/panelDocument.html' %}
       {% include 'dashboards/operateur/panels/panelLog.html' %}
       {% include 'dashboards/operateur/panels/panelParam.html' %}
@@ -42,6 +48,11 @@
 </div>
 
 <script src="{% static 'js/files.js' %}"></script>
+<script src="{% static 'js/planScan.js' %}"></script>
+<script src="{% static 'js/client-detail.js' %}"></script>
+<script src="{% static 'js/dossier_select.js' %}"></script>
+<script src="{% static 'js/nouveau_dossier.js' %}"></script>
+
 
 {% if open_modal %}
 <script>

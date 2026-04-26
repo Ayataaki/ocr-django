@@ -4,5 +4,17 @@
     <button class="btn btn-ghost btn-sm" onclick="openModal('add-dossier')">+ Dossier</button>
     <button class="btn btn-ghost btn-sm" onclick="openModal('add-doc')">+ Document</button>
     <button class="btn btn-primary btn-sm" onclick="openModal('add-client')">+ Client</button>
-    <button class="btn btn-danger btn-sm">Déconnexion</button>
+    <form id="logout-form" method="POST" action="{% url 'logout' %}" style="display:none">
+      {% csrf_token %}
+    </form>
+    <button class="btn btn-danger btn-sm" onclick="logout()">Déconnexion</button>
   </div>
+  
+  
+<script>
+function logout() {
+  if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
+    document.getElementById("logout-form").submit();
+  }
+}
+</script>
