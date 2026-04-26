@@ -460,7 +460,7 @@
         select.innerHTML = `<option value="">Chargement des dossiers...</option>`;
         select.disabled = true;
 
-        fetch(`/docs/dossiers/client/${clientId}/`)
+        fetch(`/docs/dossiers/clients/${clientId}/`)
             .then(res => res.json())
             .then(data => {
                 select.innerHTML = "";

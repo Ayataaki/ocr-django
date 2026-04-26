@@ -19,7 +19,8 @@
         <!-- un meme client peut avoir le meme nom et prenom et donc il faut identifier !!  -->
         <div class="field full">
           <label>Client</label>
-          <select id="client-select" style="flex:1" onchange="ClientDetail.load(this.value)">
+          <select name="client" id="client-select" style="flex:1" required>
+          <!-- <select id="client-select" style="flex:1" onchange="ClientDetail.load(this.value)"> -->
           <option value="">-- Choisir --</option>
           {% for client in clients %}
           <option value="{{ client.id }}">

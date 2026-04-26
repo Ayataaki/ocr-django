@@ -2,6 +2,7 @@
 <div class="panel {% if active_panel == 'nouveau' %}active{% endif %}" id="panel-nouveau">
     <div class="card">
         <div class="card-body">
+
             <!-- Modernized Header -->
             <div class="enhanced-section-header">
                 <div class="enhanced-section-icon">
@@ -18,6 +19,7 @@
 
             <!-- Client Information Card (Integrated) -->
             <div class="form-section">
+
                 <div class="form-section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -58,7 +60,7 @@
             </div>
 
             <!-- Dossier Information Card -->
-            <!-- <div class="form-section">
+            <div class="form-section">
                 <div class="form-section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -66,143 +68,35 @@
                     </svg>
                     Informations du dossier
                 </div>
+                
                 <div class="form-grid">
-                    <div class="field">
-                        <label>Référence dossier</label>
-                        <input name="reference_dossier" placeholder="Ex: DN-2026-0142" />
-                    </div>
-                    <div class="field">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="openModal('add-dossier')">
-                            + Créer un nouveau dossier
-                        </button>
-                    </div>
-                    <div class="field full-width">
-                        <label>Description</label>
-                        <textarea name="description" rows="2" placeholder="Description sommaire du dossier..."></textarea>
-                    </div>
+                    <!-- Sélecteur de dossier -->
+                    <div class="field" style="grid-column:1/-1">
+                        <label>Sélectionner un dossier</label>                        
+                        <div style="display:flex;gap:8px">
+                            <select id="dossier-select" style="flex:1"
+                                    onchange="DossierDetail.load(this.value)">
+                                <option value="">-- Choisir un dossier --</option>
+                                {% for dossier in dossiers %}
+                                <option value="{{ dossier.id }}">
+                                    {{ dossier.reference_dossier }} 
+                                    {% if dossier.date_ouverture %}
+                                    — Ouvert le {{ dossier.date_ouverture|date:"d/m/Y" }}
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn btn-ghost btn-sm"
+                                    onclick="openModal('add-dossier')">
+                                + Nouveau dossier
+                            </button>
+                        </div>
+                    </div>     
+                                 
                 </div>
-            </div> -->
-
-            <div class="form-section" id="section-dossier" style="display:none">
-
-            <div class="form-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                </svg>
-                Dossier
-            </div>
-
-            <!-- État : chargement -->
-            <div id="dossier-state-loading" class="dossier-state" style="display:none">
-                <div class="dossier-spinner"></div>
-                <span>Chargement des dossiers...</span>
-            </div>
-
-            <!-- État : dossiers trouvés -->
-            <div id="dossier-state-found" style="display:none">
-
-                <div class="form-grid">
-                <div class="field" style="grid-column:1/-1">
-                    <label for="dossier-select">
-                    Dossier existant
-                    <span id="dossier-count-label"
-                            style="font-weight:400;color:var(--text3);margin-left:6px"></span>
-                    </label>
-                    <div style="display:flex;gap:8px">
-                    <select id="dossier-select" style="flex:1"
-                            onchange="DossierSelect.onSelect(this)">
-                        <option value="">-- Choisir un dossier --</option>
-                        <!--
-                        Options créées dynamiquement par dossier_select.js.
-                        Chaque <option> porte ses données en data-attributes :
-                            data-reference, data-statut, data-date-ouverture,
-                            data-date-creation, data-description
-                        Aucun innerHTML complexe : seulement textContent + dataset.
-                        -->
-                    </select>
-                    <button type="button" class="btn btn-ghost btn-sm"
-                            onclick="openModal('add-dossier')">
-                        + Nouveau dossier
-                    </button>
-                    </div>
-                </div>
-
-                <!-- Fiche dossier sélectionné -->
-                <!-- Peuplée par dossier_select.js via data-field uniquement -->
-                <div id="dossier-fiche" class="dossier-fiche"
-                    style="display:none;grid-column:1/-1">
-
-                    <div class="dossier-fiche-header">
-                    <div class="dossier-fiche-ref">
-                        <span class="dossier-fiche-label">Référence</span>
-                        <span class="dossier-fiche-value mono"
-                            data-field="reference"></span>
-                    </div>
-                    <span class="badge-statut" data-field="statut-badge"></span>
-                    <button type="button" class="dossier-fiche-reset"
-                            onclick="DossierSelect.resetFiche()"
-                            title="Choisir un autre dossier">
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-                    </div>
-
-                    <div class="dossier-fiche-body">
-                    <div class="dossier-fiche-field">
-                        <span class="dossier-fiche-label">Date d'ouverture</span>
-                        <span class="dossier-fiche-value" data-field="date_ouverture"></span>
-                    </div>
-                    <div class="dossier-fiche-field">
-                        <span class="dossier-fiche-label">Enregistré le</span>
-                        <span class="dossier-fiche-value" data-field="date_creation"></span>
-                    </div>
-                    <div class="dossier-fiche-field full">
-                        <span class="dossier-fiche-label">Description</span>
-                        <span class="dossier-fiche-value" data-field="description"></span>
-                    </div>
-                    </div>
-
-                </div>
-                </div>
-            </div>
-
-            <!-- État : aucun dossier -->
-            <div id="dossier-state-empty" style="display:none">
-                <div class="dossier-empty-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5"
-                    style="width:28px;height:28px;opacity:.35;margin-bottom:10px">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                </svg>
-                <p>Ce client n'a pas encore de dossier ouvert.</p>
-                <button type="button" class="btn btn-primary btn-sm"
-                        onclick="openModal('add-dossier')">
-                    Ouvrir un premier dossier
-                </button>
-                </div>
-            </div>
-
-            <!-- État : erreur réseau -->
-            <div id="dossier-state-error" class="dossier-error" style="display:none">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5" style="width:14px;height:14px;flex-shrink:0">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                <span>Impossible de charger les dossiers.</span>
-                <button type="button" class="btn btn-ghost btn-sm"
-                        onclick="DossierSelect.retry()">
-                Réessayer
-                </button>
-            </div>
-
+                
+                <!-- Conteneur pour les détails du dossier sélectionné -->
+                <div id="dossier-detail-container" style="display:none"></div>
             </div>
 
             <!-- Document Scan Card -->
@@ -264,13 +158,6 @@
                 <div id="auto-keywords" style="display:none; margin-top: 12px;">
                     <div class="auto-keywords-label">Mots-clés extraits automatiquement par OCR :</div>
                     <div class="keyword-tags-list">
-                        <!-- <span class="keyword-tag">BENALI</span>
-                        <span class="keyword-tag">vente</span>
-                        <span class="keyword-tag">appartement</span>
-                        <span class="keyword-tag">Casablanca</span>
-                        <span class="keyword-tag">2026</span>
-                        <span class="keyword-tag">TF-45871</span>
-                        <span class="keyword-tag">2 500 000 MAD</span> -->
                     </div>
                 </div>
             </div>
@@ -287,6 +174,7 @@
                     Enregistrer & Lancer OCR
                 </button>
             </div>
+
         </div>
     </div>
 </div>

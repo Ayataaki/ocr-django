@@ -148,7 +148,7 @@ const DossierSelect = (() => {
     hideFiche();
 
     try {
-      const res  = await fetch(`/dossiers/client/${clientId}/`);
+      const res  = await fetch(`/docs/dossiers/clients/${clientId}/`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();

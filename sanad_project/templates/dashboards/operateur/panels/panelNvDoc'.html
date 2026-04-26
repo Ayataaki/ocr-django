@@ -108,7 +108,7 @@
 document.getElementById("client").addEventListener("change", function () {
     let clientId = this.value;
 
-    fetch(`docs/dossiers/client/?client_id=${clientId}`)
+    fetch(`/docs/dossiers/clients/?client_id=${clientId}`)
         .then(response => response.json())
         .then(data => {
             let dossierSelect = document.getElementById("dossier");
