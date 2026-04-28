@@ -43,10 +43,12 @@
 <div class="overlay" id="overlay">
   {% include 'dashboards/operateur/modals/modalUser.html' %}
   {% include 'dashboards/operateur/modals/modalClient.html' %}
+  {% include 'dashboards/operateur/modals/modalClientRead.html' %}
   {% include 'dashboards/operateur/modals/modalDoc.html' %}
   {% include 'dashboards/operateur/modals/modalDossier.html' %}
 </div>
 
+<script src="{% static 'js/app.js' %}"></script>
 <script src="{% static 'js/files.js' %}"></script>
 <script src="{% static 'js/planScan.js' %}"></script>
 <script src="{% static 'js/dossier-detail.js' %}"></script>

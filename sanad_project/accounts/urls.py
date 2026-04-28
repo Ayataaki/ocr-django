@@ -14,7 +14,7 @@ urlpatterns = [
     path("clients/", views.client.client_list, name="client_list"),
     path("clients/search/", views.client.search_clients, name="search_clients"),
     path("clients/admin/create/", views.client.client_create_admin, name="ajout_client_admin"),
-    path("clients/<int:client_id>/", views.client_detail_api, name="client_detail_api"),
+    path("clients/<int:client_id>/", views.client.client_detail_api, name="client_detail_api"),
     path("clients/operateur/create/", views.client.client_create_operateur, name="ajout_client_operateur"),
 
     path("login/", views.auth.login_view, name="login"),

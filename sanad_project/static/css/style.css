@@ -813,3 +813,15 @@ input[type="file"] {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.5; }
     }
+    .input-readonly {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: default;
+      opacity: 1; /* éviter effet grisé */
+    }
+
+    .input-readonly:focus {
+      outline: none;
+      box-shadow: none;
+    }

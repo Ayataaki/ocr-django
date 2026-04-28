@@ -33,20 +33,23 @@
                         <label>Sélectionner un client</label>
                         <div style="display:flex;gap:8px">
                             <!-- <select id="client-select" style="flex:1" onchange="ClientDetail.load(this.value)"> -->
-                            <select id="client-select" style="flex:1" onchange="NouveauDossier.onClientChange(this.value)">
-                            <option value="">-- Choisir --</option>
-                            {% for client in clients %}
-                            <option value="{{ client.id }}">
-                                {% if client.personne_physique %}
-                                {{ client.personne_physique.nom }} {{ client.personne_physique.prenom }}
-                                — {{ client.personne_physique.numero_identite }}
-                                {% elif client.personne_morale %}
-                                {{ client.personne_morale.raison_sociale }}
-                                — {{ client.personne_morale.ice|default:client.personne_morale.numero_rc }}
-                                {% endif %}
-                            </option>
-                            {% endfor %}
+                                
+                            <!-- <select id="client-select" style="flex:1" onchange="ClientDetail.onClientChange(this.value)"> -->
+                            <select id="client-select" style="flex:1" onchange="PanelNouveau.onClientChange(this.value)">
+                                <option value="">-- Choisir --</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}">
+                                    {% if client.personne_physique %}
+                                    {{ client.personne_physique.nom }} {{ client.personne_physique.prenom }}
+                                    — {{ client.personne_physique.numero_identite }}
+                                    {% elif client.personne_morale %}
+                                    {{ client.personne_morale.raison_sociale }}
+                                    — {{ client.personne_morale.ice|default:client.personne_morale.numero_rc }}
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
                             </select>
+
                             <button type="button" class="btn btn-ghost btn-sm"
                                     onclick="openModal('add-client')">
                             + Nouveau client
@@ -55,7 +58,32 @@
                     </div>
                 </div>
                 
-                <div id="client-detail-container" style="display:none"></div>
+                <div id="client-detail-container" style="display:none">
+                    <div class="dossier-fiche">
+                        <div class="dossier-fiche-header">
+                        <div>
+                            <span id="client-nom"  class="dossier-fiche-value mono"></span>
+                            <span id="client-cin"  class="dossier-fiche-label"></span>
+                        </div>
+                        <span id="client-type-badge" class="badge"></span>
+                        <button type="button" onclick="PanelNouveau.resetClient()">✕</button>
+                        </div>
+                        <div class="dossier-fiche-body">
+                        <div class="dossier-fiche-field">
+                            <span class="dossier-fiche-label">Email</span>
+                            <span id="client-email" class="dossier-fiche-value"></span>
+                        </div>
+                        <div class="dossier-fiche-field">
+                            <span class="dossier-fiche-label">Téléphone</span>
+                            <span id="client-tel" class="dossier-fiche-value"></span>
+                        </div>
+                        <div class="dossier-fiche-field full">
+                            <span class="dossier-fiche-label">Adresse</span>
+                            <span id="client-adresse" class="dossier-fiche-value"></span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
 
@@ -74,7 +102,7 @@
                     <div class="field" style="grid-column:1/-1">
                         <label>Sélectionner un dossier</label>                        
                         <div style="display:flex;gap:8px">
-                            <select id="dossier-select" style="flex:1"
+                            <!-- <select id="dossier-select" style="flex:1"
                                     onchange="DossierDetail.load(this.value)">
                                 <option value="">-- Choisir un dossier --</option>
                                 {% for dossier in dossiers %}
@@ -85,6 +113,11 @@
                                     {% endif %}
                                 </option>
                                 {% endfor %}
+                            </select> -->
+                            <!-- <select id="dossier-select" style="flex:1" onchange="ClientDetail.loadDossier(this.value)"> -->
+                            <select id="dossier-select" style="flex:1" onchange="PanelNouveau.onDossierChange(this.value)">
+
+                                <option value="">-- Choisir un dossier --</option>
                             </select>
                             <button type="button" class="btn btn-ghost btn-sm"
                                     onclick="openModal('add-dossier')">
@@ -95,8 +128,35 @@
                                  
                 </div>
                 
-                <!-- Conteneur pour les détails du dossier sélectionné -->
-                <div id="dossier-detail-container" style="display:none"></div>
+                <!-- Conteneur pour les détails du dossier sélectionné
+                <div id="dossier-detail-container" style="display:none"></div> -->
+
+                <!-- Fiche dossier — champs statiques avec id -->
+                <div id="dossier-fiche" style="display:none" class="dossier-fiche">
+                    <div class="dossier-fiche-header">
+                        <div class="dossier-fiche-ref">
+                        <span class="dossier-fiche-label">Référence</span>
+                        <span id="dossier-reference" class="dossier-fiche-value mono"></span>
+                        </div>
+                        <span id="dossier-statut-badge" class="badge-statut"></span>
+                        <button type="button" onclick="PanelNouveau.onDossierChange(null)">✕</button>
+                    </div>
+                    <div class="dossier-fiche-body">
+                        <div class="dossier-fiche-field">
+                        <span class="dossier-fiche-label">Date d'ouverture</span>
+                        <span id="dossier-date-ouverture" class="dossier-fiche-value"></span>
+                        </div>
+                        <div class="dossier-fiche-field">
+                        <span class="dossier-fiche-label">Enregistré le</span>
+                        <span id="dossier-date-creation" class="dossier-fiche-value"></span>
+                        </div>
+                        <div class="dossier-fiche-field full">
+                        <span class="dossier-fiche-label">Description</span>
+                        <span id="dossier-description" class="dossier-fiche-value"></span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Document Scan Card -->

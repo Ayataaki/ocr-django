@@ -40,6 +40,7 @@ function openModal(id){
   document.getElementById('modal-'+id).style.display='block';
   document.getElementById('overlay').classList.add('open');
 }
+
 function closeModal(){
   if(currentModal)document.getElementById('modal-'+currentModal).style.display='none';
   document.getElementById('overlay').classList.remove('open');

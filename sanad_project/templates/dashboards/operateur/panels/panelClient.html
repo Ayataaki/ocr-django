@@ -56,9 +56,9 @@
             </td>
             <td>
               <div class="actions">
-                <button class="btn btn-ghost btn-icon btn-sm" title="Voir">👁</button>
-                <button class="btn btn-ghost btn-icon btn-sm" title="Modifier">✎</button>
-                <button class="btn btn-danger btn-icon btn-sm" title="Désactiver">✕</button>
+                <button class="btn btn-ghost btn-icon btn-sm" onclick="voirClient('{{ client.id }}')" title="Voir">👁</button>
+                <button class="btn btn-ghost btn-icon btn-sm" onclick="modifierClient('{{ client.id }}')" title="Modifier">✎</button>
+                <button class="btn btn-danger btn-icon btn-sm" onclick="desactiverClient('{{ client.id }}')" title="Désactiver">✕</button>
               </div>
             </td>
           </tr>
@@ -74,3 +74,125 @@
     </div>
   </div>
 </div>
+
+<script>
+  
+  function setTypeClient(type) {
+    document.getElementById('type_client').value = type;
+
+    document.getElementById('section-physique').style.display =
+      type === 'physique' ? 'block' : 'none';
+
+    document.getElementById('section-morale').style.display =
+      type === 'morale' ? 'block' : 'none';
+
+    document.getElementById('btn-type-physique').className =
+      'btn ' + (type === 'physique' ? 'btn-primary' : 'btn-ghost');
+
+    document.getElementById('btn-type-morale').className =
+      'btn ' + (type === 'morale' ? 'btn-primary' : 'btn-ghost');
+  }
+
+  function voirClient(clientId) {
+
+  fetch(`/accounts/clients/${clientId}/`)
+    .then(res => {
+      if (!res.ok) throw new Error("Erreur API");
+      return res.json();
+    })
+    .then(data => {
+
+      const modal = document.getElementById('modal-voir-client');      
+
+      // 👉 1. Remplir les champs communs
+      modal.querySelector('[name="email"]').value = data.email || '';
+      modal.querySelector('[name="telephone"]').value = data.telephone || '';
+      modal.querySelector('[name="adresse"]').value = data.adresse || '';
+      modal.querySelector('[name="ville"]').value = data.ville || '';
+      modal.querySelector('[name="pays"]').value = data.pays || '';
+
+      // 👉 2. Type client
+      setTypeClient(data.type_client);
+
+      // 👉 3. Physique
+      if (data.type_client === 'physique' && data.personne_physique) {
+        const pp = data.personne_physique;
+
+        modal.querySelector('[name="nom"]').value = pp.nom || '';
+        modal.querySelector('[name="prenom"]').value = pp.prenom || '';
+        modal.querySelector('[name="type_identite"]').value = pp.type_identite || '';
+        modal.querySelector('[name="numero_identite"]').value = pp.numero_identite || '';
+        modal.querySelector('[name="nationalite"]').value = pp.nationalite || '';
+        modal.querySelector('[name="profession"]').value = pp.profession || '';
+        modal.querySelector('[name="date_naissance"]').value = pp.date_naissance || '';
+        modal.querySelector('[name="lieu_naissance"]').value = pp.lieu_naissance || '';
+        modal.querySelector('[name="situation_familiale"]').value = pp.situation_familiale || '';
+      }
+
+      // 👉 4. Morale
+      if (data.type_client === 'morale' && data.personne_morale) {
+        const pm = data.personne_morale;
+
+        modal.querySelector('[name="raison_sociale"]').value = pm.raison_sociale || '';
+        modal.querySelector('[name="sigle"]').value = pm.sigle || '';
+        modal.querySelector('[name="type_societe"]').value = pm.type_societe || '';
+        modal.querySelector('[name="numero_rc"]').value = pm.numero_rc || '';
+        modal.querySelector('[name="ice"]').value = pm.ice || '';
+        modal.querySelector('[name="identifiant_fiscal"]').value = pm.identifiant_fiscal || '';
+        modal.querySelector('[name="numero_patente"]').value = pm.numero_patente || '';
+        modal.querySelector('[name="capital_social"]').value = pm.capital_social || '';
+
+        modal.querySelector('[name="representant_nom"]').value = pm.representant_nom || '';
+        modal.querySelector('[name="representant_prenom"]').value = pm.representant_prenom || '';
+        modal.querySelector('[name="representant_fonction"]').value = pm.representant_fonction || '';
+        modal.querySelector('[name="date_creation_societe"]').value = pm.date_creation_societe || '';
+      }
+
+      setModalViewMode();
+
+      // 👉 5. ouvrir modal
+      openModal('voir-client');
+
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Impossible de charger le client");
+    });
+  }
+
+  function setModalViewMode() {
+
+    modalMode = "view";
+
+    const modal = document.getElementById('modal-voir-client');
+
+    // 🔒 rendre les inputs readonly
+    modal.querySelectorAll('input, textarea').forEach(el => {
+      el.readOnly = true;
+      el.classList.add('input-readonly');
+    });
+
+    // 🔒 désactiver les select
+    modal.querySelectorAll('select').forEach(el => {
+      el.disabled = true;
+      el.classList.add('input-readonly');
+    });
+
+    // ❌ cacher bouton submit
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.style.display = "none";
+  }
+
+  function modifierClient(clientId) {
+    // Logique pour modifier les informations du client
+    alert('Modifier le client ID: ' + clientId);
+  }
+
+  function desactiverClient(clientId) {
+    // Logique pour désactiver le client
+    if (confirm('Êtes-vous sûr de vouloir désactiver ce client ?')) {
+      alert('Client ID ' + clientId + ' désactivé.');
+    }
+  }
+
+</script>
