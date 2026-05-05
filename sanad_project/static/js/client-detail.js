@@ -1,41 +1,55 @@
 /**
- * client_detail.js
- * Gère l'affichage dynamique des informations client
- * dans le panel "Nouveau dossier".
+ * panel_nouveau.js
+ * Single module — replaces ClientDetail + old PanelNouveau fragments.
+ *
+ * API endpoints (Django):
+ *   GET /accounts/clients/?q=<term>   → { results: [Client] }
+ *   GET /accounts/clients/<id>/       → Client (detail)
+ *   GET /docs/dossiers/clients/<id>/  → { count, dossiers: [Dossier] }
+ *   POST /docs/dossiers/              → create dossier
+ *
+ * Client shape:
+ *   { id, type_client, email, telephone, adresse, ville, pays,
+ *     personne_physique?: { nom, prenom, numero_identite, type_identite },
+ *     personne_morale?:   { raison_sociale, numero_rc, ice } }
+ *
+ * Dossier shape:
+ *   { id, reference_dossier, statut, date_ouverture, date_creation, description }
  */
 
-const ClientDetail = (() => {
 
-  // ── Utilitaires ──────────────────────────────────
 
-  const esc = str =>
-    str ? String(str)
-           .replace(/&/g,'&amp;')
-           .replace(/</g,'&lt;')
-           .replace(/>/g,'&gt;') : '';
+const PanelNouveau = (() => {
 
-  const val = (v, cls = '') =>
-    v ? `<span class="${cls}">${esc(v)}</span>`
-      : `<span class="empty">—</span>`;
+  // ── Internal state ─────────────────────────────────────────
+  let _clientId   = null;
+  let _dossierId  = null;
+  let _file       = null;
+  let _searchTimer = null;
+  let _allClients  = [];   // cache for the initial "show all" list
 
+  // ── DOM helpers ────────────────────────────────────────────
+  const $  = id  => document.getElementById(id);
+  const $$ = sel => document.querySelectorAll(sel);
+
+  // ── Formatting ─────────────────────────────────────────────
   const fmtDate = iso => {
-    if (!iso) return null;
-    const d = new Date(iso);
-    return d.toLocaleDateString('fr-FR');
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: '2-digit', month: '2-digit', year: 'numeric'
+    });
   };
 
-  const fmtMoney = (amount, devise = 'MAD') => {
-    if (!amount) return null;
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount) + ' ' + devise;
+  const fmtBytes = n => {
+    if (n < 1024)       return n + ' o';
+    if (n < 1024 ** 2)  return (n / 1024).toFixed(0) + ' Ko';
+    return (n / 1024 ** 2).toFixed(1) + ' Mo';
   };
 
-  const initials = (data) => {
+  const initials = data => {
     if (data.type_client === 'physique' && data.personne_physique) {
-      const pp = data.personne_physique;
-      return (pp.prenom[0] || '') + (pp.nom[0] || '');
+      const { prenom = '', nom = '' } = data.personne_physique;
+      return (prenom[0] || '') + (nom[0] || '');
     }
     if (data.type_client === 'morale' && data.personne_morale) {
       return data.personne_morale.raison_sociale.slice(0, 2).toUpperCase();
@@ -43,562 +57,531 @@ const ClientDetail = (() => {
     return '?';
   };
 
-  // ── Templates HTML ────────────────────────────────
-
-  function skeletonHTML() {
-    return `
-      <div class="client-detail-card">
-        <div class="client-detail-header">
-          <div class="skeleton" style="width:36px;height:36px;border-radius:50%"></div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-            <div class="skeleton" style="width:160px;height:13px;border-radius:4px"></div>
-            <div class="skeleton" style="width:100px;height:11px;border-radius:4px"></div>
-          </div>
-        </div>
-        <div class="client-detail-body">
-          <div class="client-detail-grid">
-            ${Array(6).fill(`
-              <div class="client-detail-field">
-                <div class="skeleton" style="width:60px;height:9px;border-radius:3px;margin-bottom:4px"></div>
-                <div class="skeleton" style="width:90px;height:12px;border-radius:3px"></div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>`;
-  }
-
-  function physiqueHTML(data) {
-    const pp = data.personne_physique;
-    return `
-      <div class="client-detail-card">
-        <div class="client-detail-header">
-          <div class="client-avatar">${esc(initials(data))}</div>
-          <div class="client-detail-header-info">
-            <div class="client-detail-name">${esc(pp.prenom)} ${esc(pp.nom)}</div>
-            <div class="client-detail-sub">
-              ${esc(pp.type_identite)} · ${esc(pp.numero_identite)}
-            </div>
-          </div>
-          <span class="badge badge-blue">Pers. physique</span>
-          <button class="client-detail-reset" onclick="ClientDetail.reset()"
-                  title="Changer de client">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none"
-                 stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        <div class="client-detail-body">
-
-          <div class="client-detail-section">
-            <div class="client-detail-section-label">Identité</div>
-            <div class="client-detail-grid">
-              <div class="client-detail-field">
-                <label>Nationalité</label>
-                ${val(pp.nationalite)}
-              </div>
-              <div class="client-detail-field">
-                <label>Profession</label>
-                ${val(pp.profession)}
-              </div>
-              <div class="client-detail-field">
-                <label>Situation familiale</label>
-                ${val(pp.situation_familiale)}
-              </div>
-              <div class="client-detail-field">
-                <label>Date de naissance</label>
-                ${val(fmtDate(pp.date_naissance))}
-              </div>
-              <div class="client-detail-field">
-                <label>Lieu de naissance</label>
-                ${val(pp.lieu_naissance)}
-              </div>
-            </div>
-          </div>
-
-          <div class="client-detail-section">
-            <div class="client-detail-section-label">Contact</div>
-            <div class="client-detail-grid">
-              <div class="client-detail-field">
-                <label>Email</label>
-                ${val(data.email)}
-              </div>
-              <div class="client-detail-field">
-                <label>Téléphone</label>
-                ${val(data.telephone)}
-              </div>
-              <div class="client-detail-field full">
-                <label>Adresse</label>
-                ${val([data.adresse, data.code_postal, data.ville, data.pays]
-                       .filter(Boolean).join(', '))}
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>`;
-  }
-
-  function moraleHTML(data) {
-    const pm = data.personne_morale;
-    return `
-      <div class="client-detail-card">
-        <div class="client-detail-header">
-          <div class="client-avatar morale">${esc(initials(data))}</div>
-          <div class="client-detail-header-info">
-            <div class="client-detail-name">${esc(pm.raison_sociale)}</div>
-            <div class="client-detail-sub">
-              ${esc(pm.type_societe)} · RC ${esc(pm.numero_rc) || '—'}
-            </div>
-          </div>
-          <span class="badge badge-purple">Pers. morale</span>
-          <button class="client-detail-reset" onclick="ClientDetail.reset()"
-                  title="Changer de client">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none"
-                 stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        <div class="client-detail-body">
-
-          <div class="client-detail-section">
-            <div class="client-detail-section-label">Immatriculation</div>
-            <div class="client-detail-grid">
-              <div class="client-detail-field">
-                <label>Registre de Commerce</label>
-                ${val(pm.numero_rc, 'mono')}
-              </div>
-              <div class="client-detail-field">
-                <label>Identifiant Fiscal</label>
-                ${val(pm.identifiant_fiscal, 'mono')}
-              </div>
-              <div class="client-detail-field">
-                <label>ICE</label>
-                ${val(pm.ice, 'mono')}
-              </div>
-              <div class="client-detail-field">
-                <label>N° Patente</label>
-                ${val(pm.numero_patente, 'mono')}
-              </div>
-              <div class="client-detail-field">
-                <label>CNSS</label>
-                ${val(pm.numero_cnss, 'mono')}
-              </div>
-              <div class="client-detail-field">
-                <label>Capital social</label>
-                ${val(fmtMoney(pm.capital_social, pm.devise))}
-              </div>
-            </div>
-          </div>
-
-          <div class="client-detail-section">
-            <div class="client-detail-section-label">Représentation légale</div>
-            <div class="client-detail-grid">
-              <div class="client-detail-field">
-                <label>Représentant</label>
-                ${val([pm.representant_prenom, pm.representant_nom].filter(Boolean).join(' '))}
-              </div>
-              <div class="client-detail-field">
-                <label>Fonction</label>
-                ${val(pm.representant_fonction)}
-              </div>
-              <div class="client-detail-field">
-                <label>Effectif</label>
-                ${val(pm.effectif ? pm.effectif + ' employés' : null)}
-              </div>
-            </div>
-          </div>
-
-          <div class="client-detail-section">
-            <div class="client-detail-section-label">Contact</div>
-            <div class="client-detail-grid">
-              <div class="client-detail-field">
-                <label>Email</label>
-                ${val(data.email)}
-              </div>
-              <div class="client-detail-field">
-                <label>Téléphone</label>
-                ${val(data.telephone)}
-              </div>
-              <div class="client-detail-field full">
-                <label>Adresse</label>
-                ${val([data.adresse, data.code_postal, data.ville, data.pays]
-                       .filter(Boolean).join(', '))}
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>`;
-  }
-
-  // ── API publique ──────────────────────────────────
-
-function loadDossier(clientId){
-
-  const select = document.getElementById("dossier-select");
-
-  // état loading
-  select.innerHTML = `<option>Chargement...</option>`;
-  select.disabled = true;
-
-  fetch(`/docs/dossiers/clients/${clientId}/`)
-    .then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return r.json();
-    })
-    .then(data => {
-
-      select.innerHTML = ""; // reset
-
-      if (data.count === 0) {
-        select.innerHTML = `<option value="">Aucun dossier trouvé</option>`;
-        return;
-      }
-
-      // option par défaut
-      select.innerHTML = `<option value="">-- Choisir un dossier --</option>`;
-
-      data.dossiers.forEach(dossier => {
-
-        const option = document.createElement("option");
-
-        option.value = dossier.id;
-
-        option.textContent = `${dossier.reference_dossier} ${
-          dossier.date_ouverture 
-            ? `— Ouvert le ${formatDate(dossier.date_ouverture)}`
-            : ''
-        }`;
-
-        select.appendChild(option);
-      });
-
-      select.disabled = false;
-
-    })
-    .catch(err => {
-      console.error(err);
-
-      select.innerHTML = `<option>Erreur de chargement</option>`;
-      select.disabled = true;
-    });
-}
-
-  // function loadDossier(clientId){
-    
-  //   fetch(`/docs/dossiers/clients/${clientId}/`)
-  //     .then(r => {
-  //       if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  //       return r.json();
-  //     })
-  //     .then(data => {
-        
-  //     })
-  //     .catch(err => {
-  //       console.error('client_detail:', err);
-  //       container.innerHTML = `
-  //         <div style="background:rgba(240,73,96,.08);border:1px solid rgba(240,73,96,.2);
-  //                     border-radius:var(--rad);padding:12px 16px;font-size:12px;color:var(--red)">
-  //           Impossible de charger les informations du client.
-  //         </div>`;
-  //       // DossierSelect.load(clientId);
-  //       // if (window.NouveauDossier) NouveauDossier.onClientChange(clientId);
-  //     });
-
-  // }
-
-  function load(clientId) {
-    const container = document.getElementById('client-detail-container');
-    if (!container) return;
-
-    if (!clientId) { 
-      reset(); 
-      return; 
+  const clientLabel = data => {
+    if (data.type_client === 'physique' && data.personne_physique) {
+      const pp = data.personne_physique;
+      return {
+        name: `${pp.prenom} ${pp.nom}`,
+        id:   `${pp.type_identite} · ${pp.numero_identite}`,
+      };
     }
+    if (data.type_client === 'morale' && data.personne_morale) {
+      const pm = data.personne_morale;
+      return {
+        name: pm.raison_sociale,
+        id:   `RC ${pm.numero_rc || '—'}`,
+      };
+    }
+    return { name: '—', id: '' };
+  };
 
-    // Afficher le skeleton pendant le chargement
-    container.innerHTML  = skeletonHTML();
-    container.style.display = 'block';
+  // highlight matched substring in a string
+  const highlight = (str, term) => {
+    if (!term || !str) return esc(str);
+    const idx = str.toLowerCase().indexOf(term.toLowerCase());
+    if (idx === -1) return esc(str);
+    return esc(str.slice(0, idx))
+      + `<mark>${esc(str.slice(idx, idx + term.length))}</mark>`
+      + esc(str.slice(idx + term.length));
+  };
 
-    fetch(`/accounts/clients/${clientId}/`)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
+  const esc = s => s ? String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+
+  // ── Step unlock / lock ─────────────────────────────────────
+  function unlockSection(id) {
+    const sec = $(id);
+    if (!sec) return;
+    sec.classList.remove('pn-section--locked');
+    sec.removeAttribute('aria-disabled');
+  }
+
+  function lockSection(id) {
+    const sec = $(id);
+    if (!sec) return;
+    sec.classList.add('pn-section--locked');
+    sec.setAttribute('aria-disabled', 'true');
+  }
+
+  // ── Submit button state ────────────────────────────────────
+  function refreshSubmit() {
+    const btn = $('pn-submit-btn');
+    if (!btn) return;
+    btn.disabled = !(_clientId && _dossierId && _file);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  STEP 1 — CLIENT SEARCH
+  // ═══════════════════════════════════════════════════════════
+
+  /** Called when the user focuses the search box (show all clients) */
+  function onSearchFocus() {
+    // If a client is already selected, do nothing
+    if (_clientId) return;
+
+    const term = $('client-search')?.value || '';
+    if (term.trim()) return; // already typed something — dropdown already open
+
+    // Show all clients from cache or fetch once
+    if (_allClients.length) {
+      renderDropdown(_allClients, '');
+    } else {
+      fetchClients('');
+    }
+  }
+
+  /** Called on every keystroke in the search box */
+  function onSearchInput(value) {
+    // Show / hide the × button
+    const clearBtn = $('client-clear-btn');
+    if (clearBtn) clearBtn.classList.toggle('visible', !!value);
+
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(() => fetchClients(value.trim()), 220);
+  }
+
+  /** GET /accounts/clients/?q=<term> */
+  function fetchClients(term) {
+    const dropdown = $('client-dropdown');
+    if (!dropdown) return;
+
+    // skeleton while loading
+    dropdown.innerHTML = skeletonDropdown();
+    openDropdown();
+
+    const url = term
+      ? `/accounts/clients/search/?q=${encodeURIComponent(term)}`
+      : `/accounts/clients/search/`;
+
+    fetch(url)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(data => {
-        
-        if (data.type_client === 'physique') {
-          container.innerHTML = physiqueHTML(data);
-        } else if (data.type_client === 'morale') {
-          container.innerHTML = moraleHTML(data);
-        }
-        if (window.NouveauDossier) NouveauDossier.onClientChange(clientId);
-
+        const list = data.results || data;
+        if (!term) _allClients = list;  // cache for focus re-use
+        renderDropdown(list, term);
       })
-      .catch(err => {
-        console.error('client_detail:', err);
-        container.innerHTML = `
-          <div style="background:rgba(240,73,96,.08);border:1px solid rgba(240,73,96,.2);
-                      border-radius:var(--rad);padding:12px 16px;font-size:12px;color:var(--red)">
-            Impossible de charger les informations du client.
-          </div>`;
-        // DossierSelect.load(clientId);
-        // if (window.NouveauDossier) NouveauDossier.onClientChange(clientId);
+      .catch(() => {
+        dropdown.innerHTML =
+          `<div class="pn-dropdown-empty">Erreur de chargement</div>`;
       });
   }
 
-  function onClientChange(clientId){
-    if (!clientId){
-      reset();
+  function renderDropdown(clients, term) {
+    const dropdown = $('client-dropdown');
+    if (!dropdown) return;
+
+    if (!clients.length) {
+      dropdown.innerHTML =
+        `<div class="pn-dropdown-empty">Aucun client trouvé</div>`;
+      openDropdown();
       return;
     }
 
-    // lancer les 2 en parallèle
-    load(clientId);         // détail client
-    loadDossier(clientId);  // dossiers
+    dropdown.innerHTML = clients.map(c => {
+      const lbl   = clientLabel(c);
+      const isMorale = c.type_client === 'morale';
+      const ini   = initials(c);
+      const nameH = highlight(lbl.name, term);
+      const idH   = highlight(lbl.id, term);
+
+      return `
+        <div class="pn-dropdown-item" role="option" tabindex="0"
+             data-id="${c.id}"
+             onclick="PanelNouveau.selectClient(${c.id})"
+             onkeydown="if(event.key==='Enter')PanelNouveau.selectClient(${c.id})">
+          <div class="pn-dropdown-avatar ${isMorale ? 'morale' : ''}">${esc(ini)}</div>
+          <div class="pn-dropdown-main">
+            <div class="pn-dropdown-name">${nameH}</div>
+            <div class="pn-dropdown-id">${idH}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    openDropdown();
   }
 
-  document.getElementById("client-select").addEventListener("change", function(){
-    const clientId = this.value;
+  function openDropdown()  { $('client-dropdown')?.classList.add('open'); }
+  function closeDropdown() { $('client-dropdown')?.classList.remove('open'); }
 
-    if (clientId){
-      loadDossier(clientId);
-    }
-  });
-
-  function reset() {
-    const container = document.getElementById('client-detail-container');
-    if (container) {
-      container.innerHTML  = '';
-      container.style.display = 'none';
-    }
-    const select = document.getElementById('client-select');
-    if (select) select.value = '';
-
-    
-    // DossierSelect.reset();
-
-    // if (window.NouveauDossier) NouveauDossier.onClientChange(null);
-
-  }
-
-  return { load, reset, onClientChange };
-
-})();
-
-
-// NEW CODE INSERTED WISHING THAT IT WORKS , IF IT DOES PLEASE REMOVE THE CODE ABOVE 
-
-
-const PanelNouveau = (() => {
-
-  // ── État ─────────────────────────────────────────
-  let _clientId  = null;
-  let _dossierId = null;
-
-  // ── Utilitaires DOM ──────────────────────────────
-  const $ = id => document.getElementById(id);
-
-  const fmtDate = iso => iso
-    ? new Date(iso).toLocaleDateString('fr-FR')
-    : '—';
-
-  // ── Étape 1 : changement de client ───────────────
-  function onClientChange(clientId) {
-    _clientId  = clientId || null;
+  /** User clicked a client in the dropdown */
+  function selectClient(clientId) {
+    closeDropdown();
+    _clientId  = clientId;
     _dossierId = null;
 
-    // Réinitialiser le select dossier
-    resetDossierSelect();
-    hideDossierFiche();
+    // Clear search box & hide × btn
+    const inp = $('client-search');
+    if (inp) inp.value = '';
+    $('client-clear-btn')?.classList.remove('visible');
 
-    if (!clientId) {
-      resetClientFiche();
-      return;
-    }
-
-    // Lancer les deux fetches en parallèle
+    // Fetch full detail + dossiers in parallel
     fetchClientFiche(clientId);
     fetchDossiers(clientId);
   }
 
-  // ── Fiche client ─────────────────────────────────
-  function resetClientFiche() {
-    const c = $('client-detail-container');
-    if (c) { c.innerHTML = ''; c.style.display = 'none'; }
-  }
-
+  /** GET /accounts/clients/<id>/ */
   function fetchClientFiche(clientId) {
-    const container = $('client-detail-container');
-    if (!container) return;
-
-    // Skeleton
-    container.style.display = 'block';
-    container.innerHTML = skeletonHTML();
+    // Show skeleton immediately
+    const fiche = $('client-fiche');
+    if (!fiche) return;
+    fiche.style.display = 'grid';
 
     fetch(`/accounts/clients/${clientId}/`)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(data => renderClientFiche(data))
       .catch(() => {
-        container.innerHTML =
-          '<p style="color:var(--red);font-size:12px">Erreur de chargement.</p>';
+        // graceful degradation — keep fiche visible but show error
+        $('client-nom').textContent = 'Erreur de chargement';
       });
   }
 
   function renderClientFiche(data) {
-    const container = $('client-detail-container');
-    if (!container) return;
+    const fiche = $('client-fiche');
+    if (!fiche) return;
 
-    // Vider et remplir uniquement les champs via data-field
-    // On garde le HTML statique dans le template, on ne l'injecte pas ici
-    // → Stratégie : chaque champ a un data-field dans le HTML
-
-    // Construire la fiche en remplissant les champs data-field
-    fillField('client-nom',      data.type_client === 'physique'
-      ? `${data.personne_physique?.prenom} ${data.personne_physique?.nom}`
-      : data.personne_morale?.raison_sociale);
-
-    fillField('client-cin',      data.type_client === 'physique'
+    const lbl     = clientLabel(data);
+    const isMorale = data.type_client === 'morale';
+    const ini     = initials(data);
+    const adresse = [data.adresse, data.ville, data.pays].filter(Boolean).join(', ');
+    const idText  = data.type_client === 'physique'
       ? data.personne_physique?.numero_identite
-      : data.personne_morale?.numero_rc);
+      : data.personne_morale?.numero_rc;
 
-    fillField('client-email',    data.email);
-    fillField('client-tel',      data.telephone);
-    fillField('client-adresse',  [data.adresse, data.ville, data.pays]
-                                   .filter(Boolean).join(', '));
-
-    // Badge type
-    const badge = $('client-type-badge');
-    if (badge) {
-      badge.textContent = data.type_client === 'physique'
-        ? 'Pers. physique' : 'Pers. morale';
-      badge.className = 'badge ' + (data.type_client === 'physique'
-        ? 'badge-blue' : 'badge-purple');
+    // Avatar
+    const av = $('client-avatar');
+    if (av) {
+      av.textContent = ini;
+      av.className = 'pn-avatar' + (isMorale ? ' morale' : '');
     }
 
-    container.style.display = 'block';
+    fill('client-nom',     lbl.name);
+    fill('client-cin',     idText);
+    fill('client-email',   data.email);
+    fill('client-tel',     data.telephone);
+    fill('client-adresse', adresse);
+
+    const badge = $('client-type-badge');
+    if (badge) {
+      badge.textContent = isMorale ? 'Pers. morale' : 'Pers. physique';
+      badge.className   = 'pn-badge ' + (isMorale ? 'pn-badge--purple' : 'pn-badge--blue');
+    }
+
+    fiche.style.display = 'grid';
   }
 
-  function fillField(id, value) {
+  // ═══════════════════════════════════════════════════════════
+  //  STEP 2 — DOSSIERS
+  // ═══════════════════════════════════════════════════════════
+
+  /** GET /docs/dossiers/clients/<id>/ */
+  function fetchDossiers(clientId) {
+    unlockSection('step-dossier');
+    hideDossierFiche();
+
+    const grid    = $('dossier-grid');
+    const addWrap = $('dossier-add-wrap');
+
+    if (!grid) return;
+
+    // skeleton
+    grid.innerHTML = skeletonDossierGrid();
+    if (addWrap) addWrap.style.display = 'none';
+
+    fetch(`/docs/dossiers/clients/${clientId}/`)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => renderDossierGrid(data.dossiers || []))
+      .catch(() => {
+        grid.innerHTML =
+          `<div class="pn-dossier-empty"><span>Erreur de chargement des dossiers</span></div>`;
+      });
+  }
+
+  function renderDossierGrid(dossiers) {
+    const grid    = $('dossier-grid');
+    const addWrap = $('dossier-add-wrap');
+
+    if (!grid) return;
+    if (addWrap) addWrap.style.display = 'flex';
+
+    if (!dossiers.length) {
+      grid.innerHTML = `
+        <div class="pn-dossier-empty">
+          <svg viewBox="0 0 48 48" fill="none">
+            <rect x="8" y="14" width="32" height="26" rx="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 20h32" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M16 8l4 6h12l4-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          <span>Aucun dossier — créez-en un</span>
+        </div>`;
+      return;
+    }
+
+    const statutClass = s => {
+      const m = { ouvert: 'ouvert', fermé: 'ferme', en_cours: 'en_cours' };
+      return m[s?.toLowerCase()] || '';
+    };
+
+    grid.innerHTML = dossiers.map(d => `
+      <div class="pn-dossier-card" data-id="${d.id}"
+           data-reference="${esc(d.reference_dossier)}"
+           data-description="${esc(d.description || '')}"
+           data-statut="${esc(d.statut || '')}"
+           data-date-ouverture="${esc(d.date_ouverture || '')}"
+           data-date-creation="${esc(d.date_creation || '')}"
+           onclick="PanelNouveau.onDossierChange(${d.id}, this)"
+           tabindex="0"
+           onkeydown="if(event.key==='Enter')PanelNouveau.onDossierChange(${d.id}, this)">
+        <div class="pn-dossier-card-ref">${esc(d.reference_dossier)}</div>
+        <div class="pn-dossier-card-date">
+          ${d.date_ouverture ? 'Ouvert le ' + fmtDate(d.date_ouverture) : 'Date inconnue'}
+        </div>
+        <span class="pn-dossier-card-statut ${statutClass(d.statut)}">${esc(d.statut || '—')}</span>
+      </div>`).join('');
+  }
+
+  /** User clicked a dossier card */
+  function onDossierChange(dossierId, cardEl) {
+    _dossierId = dossierId || null;
+
+    // Deselect all cards
+    $$('.pn-dossier-card').forEach(c => c.classList.remove('selected'));
+
+    if (!dossierId || !cardEl) {
+      hideDossierFiche();
+      refreshSubmit();
+      return;
+    }
+
+    cardEl.classList.add('selected');
+
+    // Read data from card's data-attributes (no extra fetch needed)
+    const d = cardEl.dataset;
+    fill('dossier-reference',     d.reference);
+    fill('dossier-description',   d.description || '—');
+    fill('dossier-date-ouverture', fmtDate(d.dateOuverture));
+    fill('dossier-date-creation',  fmtDate(d.dateCreation));
+
+    const badge = $('dossier-statut-badge');
+    if (badge) {
+      badge.textContent = d.statut || '—';
+      const cls = { ouvert: 'ouvert', 'fermé': 'ferme', en_cours: 'en_cours' };
+      badge.className   = 'pn-statut-badge ' + (cls[d.statut?.toLowerCase()] || '');
+    }
+
+    showDossierFiche();
+    unlockSection('step-document');
+    refreshSubmit();
+  }
+
+  function showDossierFiche() { const f = $('dossier-fiche'); if (f) f.style.display = 'grid'; }
+  function hideDossierFiche() { const f = $('dossier-fiche'); if (f) f.style.display = 'none'; }
+
+  // ═══════════════════════════════════════════════════════════
+  //  STEP 3 — FILE / DRAG & DROP
+  // ═══════════════════════════════════════════════════════════
+
+  function onDragOver(e) {
+    e.preventDefault();
+    $('pn-dropzone')?.classList.add('drag-over');
+  }
+
+  function onDragLeave(e) {
+    $('pn-dropzone')?.classList.remove('drag-over');
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    $('pn-dropzone')?.classList.remove('drag-over');
+    const files = e.dataTransfer?.files;
+    if (files?.length) handleFile(files[0]);
+  }
+
+  function onFileSelect(files) {
+    if (files?.length) handleFile(files[0]);
+  }
+
+  function handleFile(file) {
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+    const maxSize = 50 * 1024 * 1024; // 50 MB
+
+    if (!allowed.includes(file.type)) {
+      showFileError('Format non supporté. Utilisez PDF, JPG ou PNG.');
+      return;
+    }
+    if (file.size > maxSize) {
+      showFileError('Fichier trop grand (max 50 Mo).');
+      return;
+    }
+
+    _file = file;
+
+    // Show preview
+    fill('pn-file-name', file.name);
+    fill('pn-file-meta', fmtBytes(file.size));
+    $('pn-dropzone').style.display    = 'none';
+    $('pn-file-preview').style.display = 'flex';
+
+    refreshSubmit();
+  }
+
+  function removeFile() {
+    _file = null;
+    $('pn-dropzone').style.display     = 'block';
+    $('pn-file-preview').style.display = 'none';
+    $('pn-file-input').value = '';
+    $('pn-auto-kw').style.display      = 'none';
+    refreshSubmit();
+  }
+
+  function showFileError(msg) {
+    // TODO: replace with your app's toast/notification system
+    alert(msg);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  RESET
+  // ═══════════════════════════════════════════════════════════
+
+  function resetClient() {
+    _clientId  = null;
+    _dossierId = null;
+    _file      = null;
+
+    // Search box
+    const inp = $('client-search');
+    if (inp) inp.value = '';
+    $('client-clear-btn')?.classList.remove('visible');
+
+    // Client fiche
+    const fiche = $('client-fiche');
+    if (fiche) fiche.style.display = 'none';
+
+    // Dropdown
+    closeDropdown();
+
+    // Dossier section
+    const grid = $('dossier-grid');
+    if (grid) grid.innerHTML = `
+      <div class="pn-dossier-empty" id="dossier-empty">
+        <svg viewBox="0 0 48 48" fill="none">
+          <rect x="8" y="14" width="32" height="26" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 20h32" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M16 8l4 6h12l4-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span>Sélectionnez un client pour voir ses dossiers</span>
+      </div>`;
+    hideDossierFiche();
+    $('dossier-add-wrap').style.display = 'none';
+
+    // Document section
+    removeFile();
+    lockSection('step-dossier');
+    lockSection('step-document');
+
+    refreshSubmit();
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SUBMIT
+  // ═══════════════════════════════════════════════════════════
+
+  function submit() {
+    if (!_clientId || !_dossierId || !_file) return;
+
+    const formData = new FormData();
+    formData.append('client_id',  _clientId);
+    formData.append('dossier_id', _dossierId);
+    formData.append('document',   _file);
+    formData.append('keywords',   $('pn-keywords-input')?.value || '');
+
+    const btn = $('pn-submit-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
+
+    const csrf = getCsrfToken();
+
+    fetch('/docs/documents/', {
+      method: 'POST',
+      headers: csrf ? { 'X-CSRFToken': csrf } : {},
+      body: formData,
+    })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => {
+        // success — redirect or show confirmation
+        if (typeof switchPanel === 'function') {
+          switchPanel('op', 'dashboard');
+        }
+      })
+      .catch(err => {
+        console.error('submit error:', err);
+        if (btn) { btn.disabled = false; btn.textContent = 'Enregistrer & Lancer OCR'; }
+        showFileError('Erreur lors de l\'envoi. Veuillez réessayer.');
+      });
+  }
+
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta) return meta.getAttribute('content');
+    const cookie = document.cookie.split(';')
+      .find(c => c.trim().startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : null;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SKELETONS
+  // ═══════════════════════════════════════════════════════════
+
+  function skeletonDropdown() {
+    return Array(4).fill(`
+      <div class="pn-dropdown-skeleton">
+        <div class="skeleton" style="width:30px;height:30px;border-radius:50%"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div class="skeleton" style="width:140px;height:11px"></div>
+          <div class="skeleton" style="width:90px;height:10px"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  function skeletonDossierGrid() {
+    return Array(3).fill(`
+      <div class="pn-dossier-card" style="pointer-events:none">
+        <div class="skeleton" style="width:120px;height:12px;margin-bottom:8px"></div>
+        <div class="skeleton" style="width:80px;height:10px;margin-bottom:8px"></div>
+        <div class="skeleton" style="width:55px;height:10px"></div>
+      </div>`).join('');
+  }
+
+  // ── Generic fill helper ──────────────────────────────────
+  function fill(id, value) {
     const el = $(id);
     if (el) el.textContent = value || '—';
   }
 
-  // ── Étape 2 : dossiers ────────────────────────────
-  function resetDossierSelect() {
-    const sel = $('dossier-select');
-    if (!sel) return;
-    while (sel.options.length > 1) sel.remove(1);
-    sel.disabled = true;
-    sel.options[0].textContent = '— Choisir un dossier —';
-  }
+  // ═══════════════════════════════════════════════════════════
+  //  GLOBAL CLICK — close dropdown when clicking outside
+  // ═══════════════════════════════════════════════════════════
 
-  function fetchDossiers(clientId) {
-    const sel = $('dossier-select');
-    if (!sel) return;
-
-    sel.options[0].textContent = 'Chargement...';
-    sel.disabled = true;
-
-    fetch(`/docs/dossiers/clients/${clientId}/`)
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(data => buildDossierSelect(data.dossiers || []))
-      .catch(() => {
-        sel.options[0].textContent = 'Erreur de chargement';
-      });
-  }
-
-  function buildDossierSelect(dossiers) {
-    const sel = $('dossier-select');
-    if (!sel) return;
-
-    // Vider sauf le placeholder
-    while (sel.options.length > 1) sel.remove(1);
-
-    if (!dossiers.length) {
-      sel.options[0].textContent = 'Aucun dossier — créez-en un';
-      sel.disabled = true;
-      return;
+  document.addEventListener('click', e => {
+    const search = $('client-search');
+    const dd     = $('client-dropdown');
+    if (!search || !dd) return;
+    if (!search.contains(e.target) && !dd.contains(e.target)) {
+      closeDropdown();
     }
+  });
 
-    sel.options[0].textContent = '— Choisir un dossier —';
-
-    dossiers.forEach(d => {
-      const opt = new Option(
-        `${d.reference_dossier}  ·  Ouvert le ${fmtDate(d.date_ouverture)}`,
-        d.id
-      );
-      // Stocker les données en data-attributes
-      opt.dataset.reference    = d.reference_dossier;
-      opt.dataset.description  = d.description || '';
-      opt.dataset.statut       = d.statut;
-      opt.dataset.dateOuverture= d.date_ouverture || '';
-      opt.dataset.dateCreation = d.date_creation  || '';
-      sel.add(opt);
-    });
-
-    sel.disabled = false;
-  }
-
-  // ── Étape 2 : sélection d'un dossier ─────────────
-  function onDossierChange(dossierId) {
-    _dossierId = dossierId || null;
-
-    if (!dossierId) { hideDossierFiche(); return; }
-
-    const sel = $('dossier-select');
-    const opt = sel?.options[sel.selectedIndex];
-    if (!opt) return;
-
-    // Remplir la fiche via data-field — aucun innerHTML
-    fillField('dossier-reference',     opt.dataset.reference);
-    fillField('dossier-description',   opt.dataset.description || '—');
-    fillField('dossier-date-ouverture',fmtDate(opt.dataset.dateOuverture));
-    fillField('dossier-date-creation', fmtDate(opt.dataset.dateCreation));
-
-    const badge = $('dossier-statut-badge');
-    if (badge) {
-      badge.textContent = opt.dataset.statut || '—';
-      badge.className   = 'badge-statut ' + (opt.dataset.statut || '');
-    }
-
-    showDossierFiche();
-  }
-
-  function showDossierFiche() {
-    const f = $('dossier-fiche');
-    if (f) f.style.display = 'block';
-  }
-
-  function hideDossierFiche() {
-    const f = $('dossier-fiche');
-    if (f) f.style.display = 'none';
-  }
-
-  // ── Reset client ──────────────────────────────────
-  function resetClient() {
-    _clientId  = null;
-    _dossierId = null;
-    const sel = $('client-select');
-    if (sel) sel.value = '';
-    resetClientFiche();
-    resetDossierSelect();
-    hideDossierFiche();
-  }
-
-  // ── Skeleton HTML (minimal, pas de logique) ───────
-  function skeletonHTML() {
-    return `<div style="display:flex;flex-direction:column;gap:8px;padding:12px">
-      <div class="skeleton" style="width:160px;height:13px;border-radius:4px"></div>
-      <div class="skeleton" style="width:120px;height:11px;border-radius:4px"></div>
-    </div>`;
-  }
-
-  return { onClientChange, onDossierChange, resetClient };
+  // ── Public API ───────────────────────────────────────────
+  return {
+    onSearchFocus,
+    onSearchInput,
+    selectClient,
+    onDossierChange,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    onFileSelect,
+    removeFile,
+    resetClient,
+    submit,
+  };
 
 })();

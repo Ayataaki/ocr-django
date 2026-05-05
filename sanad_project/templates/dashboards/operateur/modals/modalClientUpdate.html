@@ -1,0 +1,210 @@
+<!-- ══════════════════════════════════════════
+     MODAL — Modifier un client
+     IDs préfixés "edit-" pour éviter les conflits
+     Ouvert par modifierClient(clientId) dans panelClient.html
+════════════════════════════════════════════ -->
+<div class="modal" id="modal-edit-client" style="display:none;max-width:600px">
+
+  <div class="modal-head">
+    <h3>Modifier le client</h3>
+    <button type="button" class="btn btn-ghost btn-icon"
+            onclick="closeModal()">✕</button>
+  </div>
+
+  <form id="form-edit-client" method="POST">
+    {% csrf_token %}
+
+    <div class="modal-body">
+
+      <!-- Sélecteur de type — lecture seule en modification -->
+      <div style="display:flex;gap:8px;margin-bottom:18px">
+        <button type="button" id="edit-btn-physique"
+                class="btn btn-primary" style="flex:1" disabled>
+          Personne physique
+        </button>
+        <button type="button" id="edit-btn-morale"
+                class="btn btn-ghost" style="flex:1" disabled>
+          Personne morale
+        </button>
+        <input type="hidden" name="type_client" id="edit-type-client"/>
+      </div>
+
+      <!-- ── Coordonnées ── -->
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+                  color:var(--text3);margin-bottom:10px;font-weight:500">
+        Coordonnées
+      </div>
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="field">
+          <label>Email *</label>
+          <input id="edit-email" name="email" type="email" required/>
+        </div>
+        <div class="field">
+          <label>Téléphone</label>
+          <input id="edit-telephone" name="telephone"/>
+        </div>
+        <div class="field full">
+          <label>Adresse</label>
+          <input id="edit-adresse" name="adresse"/>
+        </div>
+        <div class="field">
+          <label>Ville</label>
+          <input id="edit-ville" name="ville"/>
+        </div>
+        <div class="field">
+          <label>Code postal</label>
+          <input id="edit-code-postal" name="code_postal"/>
+        </div>
+        <div class="field">
+          <label>Pays</label>
+          <input id="edit-pays" name="pays"/>
+        </div>
+      </div>
+
+      <!-- ── Personne physique ── -->
+      <div id="edit-section-physique" style="display:none">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+                    color:var(--text3);margin-bottom:10px;font-weight:500">
+          Identité
+        </div>
+        <div class="form-grid" style="margin-bottom:16px">
+          <div class="field">
+            <label>Nom *</label>
+            <input id="edit-nom" name="nom"/>
+          </div>
+          <div class="field">
+            <label>Prénom *</label>
+            <input id="edit-prenom" name="prenom"/>
+          </div>
+          <div class="field">
+            <label>Type d'identité</label>
+            <select id="edit-type-identite" name="type_identite">
+              <option value="">-- Choisir --</option>
+              <option value="CIN">CIN</option>
+              <option value="Passeport">Passeport</option>
+              <option value="Carte séjour">Carte de séjour</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Numéro d'identité *</label>
+            <input id="edit-numero-identite" name="numero_identite"/>
+          </div>
+          <div class="field">
+            <label>Nationalité</label>
+            <input id="edit-nationalite" name="nationalite"/>
+          </div>
+          <div class="field">
+            <label>Profession</label>
+            <input id="edit-profession" name="profession"/>
+          </div>
+          <div class="field">
+            <label>Date de naissance</label>
+            <input id="edit-date-naissance" name="date_naissance" type="date"/>
+          </div>
+          <div class="field">
+            <label>Lieu de naissance</label>
+            <input id="edit-lieu-naissance" name="lieu_naissance"/>
+          </div>
+          <div class="field">
+            <label>Situation familiale</label>
+            <select id="edit-situation-familiale" name="situation_familiale">
+              <option value="">--</option>
+              <option value="Célibataire">Célibataire</option>
+              <option value="Marié">Marié(e)</option>
+              <option value="Divorcé">Divorcé(e)</option>
+              <option value="Veuf">Veuf/Veuve</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Personne morale ── -->
+      <div id="edit-section-morale" style="display:none">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+                    color:var(--text3);margin-bottom:10px;font-weight:500">
+          Société
+        </div>
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="field full">
+            <label>Raison sociale *</label>
+            <input id="edit-raison-sociale" name="raison_sociale"/>
+          </div>
+          <div class="field">
+            <label>Sigle</label>
+            <input id="edit-sigle" name="sigle"/>
+          </div>
+          <div class="field">
+            <label>Type de société</label>
+            <select id="edit-type-societe" name="type_societe">
+              <option value="">--</option>
+              <option value="SARL">SARL</option>
+              <option value="SA">Société Anonyme</option>
+              <option value="SAS">SAS</option>
+              <option value="SNC">SNC</option>
+              <option value="SCI">SCI</option>
+              <option value="Association">Association</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>N° Registre de Commerce</label>
+            <input id="edit-numero-rc" name="numero_rc"/>
+          </div>
+          <div class="field">
+            <label>ICE</label>
+            <input id="edit-ice" name="ice"/>
+          </div>
+          <div class="field">
+            <label>Identifiant fiscal</label>
+            <input id="edit-identifiant-fiscal" name="identifiant_fiscal"/>
+          </div>
+          <div class="field">
+            <label>N° Patente</label>
+            <input id="edit-numero-patente" name="numero_patente"/>
+          </div>
+          <div class="field">
+            <label>N° CNSS</label>
+            <input id="edit-numero-cnss" name="numero_cnss"/>
+          </div>
+          <div class="field">
+            <label>Capital social (MAD)</label>
+            <input id="edit-capital-social" name="capital_social" type="number"/>
+          </div>
+        </div>
+
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+                    color:var(--text3);margin-bottom:10px;font-weight:500">
+          Représentant légal
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Nom</label>
+            <input id="edit-representant-nom" name="representant_nom"/>
+          </div>
+          <div class="field">
+            <label>Prénom</label>
+            <input id="edit-representant-prenom" name="representant_prenom"/>
+          </div>
+          <div class="field">
+            <label>Fonction</label>
+            <input id="edit-representant-fonction" name="representant_fonction"/>
+          </div>
+          <div class="field">
+            <label>Date création société</label>
+            <input id="edit-date-creation-societe"
+                   name="date_creation_societe" type="date"/>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost"
+              onclick="closeModal()">Annuler</button>
+      <button type="submit" class="btn btn-primary"
+              id="edit-btn-submit">Enregistrer</button>
+    </div>
+
+  </form>
+</div>

@@ -1,224 +1,157 @@
 <div class="modal" id="modal-voir-client" style="display:none;max-width:600px">
   <div class="modal-head">
-    <h3>Voir client</h3>
+    <h3 id="voir-modal-titre">Détail client</h3>
     <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
   </div>
 
-  <!-- <form method="POST" action="{% url 'ajout_client_admin' %}" id="form-add-client">
-    {% csrf_token %} -->
-    <div class="modal-body">
+  <div class="modal-body">
 
-      <!-- Sélecteur de type -->
-      <div style="display:flex;gap:8px;margin-bottom:18px">
-        <button type="button" id="btn-type-physique"
-                class="btn btn-primary" style="flex:1"
-                onclick="setTypeClient('physique')">
-          Personne physique
-        </button>
-        <button type="button" id="btn-type-morale"
-                class="btn btn-ghost" style="flex:1"
-                onclick="setTypeClient('morale')">
-          Personne morale
-        </button>
-        <input type="hidden" name="type_client" id="type_client" value="physique"/>
-      </div>
+    <!-- Sélecteur de type — lecture seule -->
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <button type="button" id="voir-btn-physique"
+              class="btn btn-primary" style="flex:1" disabled>
+        Personne physique
+      </button>
+      <button type="button" id="voir-btn-morale"
+              class="btn btn-ghost" style="flex:1" disabled>
+        Personne morale
+      </button>
+    </div>
 
-      <!-- Champs communs -->
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
-                  color:var(--text3);margin-bottom:10px;font-weight:500">
-        Coordonnées
+    <!-- Coordonnées -->
+    <div class="form-section-label">Coordonnées</div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="field">
+        <label>Email</label>
+        <input id="voir-email" name="email" type="email" readonly/>
       </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input id="voir-telephone" readonly/>
+      </div>
+      <div class="field full">
+        <label>Adresse</label>
+        <input id="voir-adresse" readonly/>
+      </div>
+      <div class="field">
+        <label>Ville</label>
+        <input id="voir-ville" readonly/>
+      </div>
+      <div class="field">
+        <label>Pays</label>
+        <input id="voir-pays" readonly/>
+      </div>
+    </div>
+
+    <!-- Personne physique -->
+    <div id="voir-section-physique">
+      <div class="form-section-label">Identité</div>
       <div class="form-grid" style="margin-bottom:16px">
         <div class="field">
-          <label>Email *</label>
-          <input name="email" type="email" placeholder="email@exemple.ma" required/>
+          <label>Nom</label>
+          <input id="voir-nom" readonly/>
         </div>
         <div class="field">
-          <label>Téléphone</label>
-          <input name="telephone" placeholder="06 XX XX XX XX"/>
+          <label>Prénom</label>
+          <input id="voir-prenom" readonly/>
         </div>
+        <div class="field">
+          <label>Type d'identité</label>
+          <input id="voir-type-identite" readonly/>
+        </div>
+        <div class="field">
+          <label>Numéro d'identité</label>
+          <input id="voir-numero-identite" readonly/>
+        </div>
+        <div class="field">
+          <label>Nationalité</label>
+          <input id="voir-nationalite" readonly/>
+        </div>
+        <div class="field">
+          <label>Profession</label>
+          <input id="voir-profession" readonly/>
+        </div>
+        <div class="field">
+          <label>Date de naissance</label>
+          <input id="voir-date-naissance" type="date" readonly/>
+        </div>
+        <div class="field">
+          <label>Lieu de naissance</label>
+          <input id="voir-lieu-naissance" readonly/>
+        </div>
+        <div class="field">
+          <label>Situation familiale</label>
+          <input id="voir-situation-familiale" readonly/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personne morale -->
+    <div id="voir-section-morale" style="display:none">
+      <div class="form-section-label">Société</div>
+      <div class="form-grid" style="margin-bottom:12px">
         <div class="field full">
-          <label>Adresse</label>
-          <input name="adresse" placeholder="Adresse complète"/>
+          <label>Raison sociale</label>
+          <input id="voir-raison-sociale" readonly/>
         </div>
         <div class="field">
-          <label>Ville</label>
-          <input name="ville" placeholder="Casablanca"/>
+          <label>Sigle</label>
+          <input id="voir-sigle" readonly/>
         </div>
         <div class="field">
-          <label>Pays</label>
-          <input name="pays" value="Maroc"/>
+          <label>Type de société</label>
+          <input id="voir-type-societe" readonly/>
+        </div>
+        <div class="field">
+          <label>N° Registre de Commerce</label>
+          <input id="voir-numero-rc" readonly/>
+        </div>
+        <div class="field">
+          <label>ICE</label>
+          <input id="voir-ice" readonly/>
+        </div>
+        <div class="field">
+          <label>Identifiant fiscal</label>
+          <input id="voir-identifiant-fiscal" readonly/>
+        </div>
+        <div class="field">
+          <label>N° Patente</label>
+          <input id="voir-numero-patente" readonly/>
+        </div>
+        <div class="field">
+          <label>Capital social</label>
+          <input id="voir-capital-social" readonly/>
         </div>
       </div>
 
-      <!-- ── Personne physique ── -->
-      <div id="section-physique">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
-                    color:var(--text3);margin-bottom:10px;font-weight:500">
-          Identité
+      <div class="form-section-label">Représentant légal</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nom</label>
+          <input id="voir-representant-nom" readonly/>
         </div>
-        <div class="form-grid" style="margin-bottom:16px">
-          <div class="field">
-            <label>Nom *</label>
-            <input name="nom" placeholder="Nom de famille"/>
-          </div>
-          <div class="field">
-            <label>Prénom *</label>
-            <input name="prenom" placeholder="Prénom"/>
-          </div>
-          <div class="field">
-            <label>Type d'identité *</label>
-            <select name="type_identite">
-              <option value="">-- Choisir --</option>
-              <option value="CIN">CIN</option>
-              <option value="Passeport">Passeport</option>
-              <option value="Carte séjour">Carte de séjour</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Numéro d'identité *</label>
-            <input name="numero_identite" placeholder="AB123456"/>
-          </div>
-          <div class="field">
-            <label>Nationalité</label>
-            <input name="nationalite" placeholder="Marocaine"/>
-          </div>
-          <div class="field">
-            <label>Profession</label>
-            <input name="profession" placeholder="Profession"/>
-          </div>
-          <div class="field">
-            <label>Date de naissance</label>
-            <input name="date_naissance" type="date"/>
-          </div>
-          <div class="field">
-            <label>Lieu de naissance</label>
-            <input name="lieu_naissance" placeholder="Casablanca"/>
-          </div>
-          <div class="field">
-            <label>Situation familiale</label>
-            <select name="situation_familiale">
-              <option value="">--</option>
-              <option value="Célibataire">Célibataire</option>
-              <option value="Marié">Marié(e)</option>
-              <option value="Divorcé">Divorcé(e)</option>
-              <option value="Veuf">Veuf/Veuve</option>
-            </select>
-          </div>
+        <div class="field">
+          <label>Prénom</label>
+          <input id="voir-representant-prenom" readonly/>
+        </div>
+        <div class="field">
+          <label>Fonction</label>
+          <input id="voir-representant-fonction" readonly/>
+        </div>
+        <div class="field">
+          <label>Date création société</label>
+          <input id="voir-date-creation-societe" type="date" readonly/>
         </div>
       </div>
-
-      <!-- ── Personne morale ── -->
-      <div id="section-morale" style="display:none">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
-                    color:var(--text3);margin-bottom:10px;font-weight:500">
-          Société
-        </div>
-        <div class="form-grid" style="margin-bottom:12px">
-          <div class="field full">
-            <label>Raison sociale *</label>
-            <input name="raison_sociale" placeholder="Nom de l'entreprise"/>
-          </div>
-          <div class="field">
-            <label>Sigle</label>
-            <input name="sigle" placeholder="SARL, SA..."/>
-          </div>
-          <div class="field">
-            <label>Type de société</label>
-            <select name="type_societe">
-              <option value="">--</option>
-              <option value="SARL">SARL</option>
-              <option value="SA">Société Anonyme</option>
-              <option value="SAS">SAS</option>
-              <option value="SNC">SNC</option>
-              <option value="SCI">SCI</option>
-              <option value="Association">Association</option>
-              <option value="Autre">Autre</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>N° Registre de Commerce</label>
-            <input name="numero_rc" placeholder="RC-XXXXX"/>
-          </div>
-          <div class="field">
-            <label>ICE</label>
-            <input name="ice" placeholder="Identifiant commun entreprise"/>
-          </div>
-          <div class="field">
-            <label>Identifiant fiscal</label>
-            <input name="identifiant_fiscal" placeholder="IF-XXXXX"/>
-          </div>
-          <div class="field">
-            <label>N° Patente</label>
-            <input name="numero_patente" placeholder="Patente"/>
-          </div>
-          <div class="field">
-            <label>Capital social (MAD)</label>
-            <input name="capital_social" type="number" placeholder="100000"/>
-          </div>
-        </div>
-
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
-                    color:var(--text3);margin-bottom:10px;font-weight:500">
-          Représentant légal
-        </div>
-        <div class="form-grid">
-          <div class="field">
-            <label>Nom</label>
-            <input name="representant_nom" placeholder="Nom du représentant"/>
-          </div>
-          <div class="field">
-            <label>Prénom</label>
-            <input name="representant_prenom" placeholder="Prénom"/>
-          </div>
-          <div class="field">
-            <label>Fonction</label>
-            <input name="representant_fonction" placeholder="Gérant, PDG..."/>
-          </div>
-          <div class="field">
-            <label>Date création société</label>
-            <input name="date_creation_societe" type="date"/>
-          </div>
-        </div>
-      </div>
-
     </div>
-    <div class="modal-foot">
-      <button type="button" class="btn btn-ghost" onclick="closeModal()">Annuler</button>
-      <button type="submit" class="btn btn-primary">Créer le client</button>
-    </div>
-  <!-- </form> -->
+
+  </div>
+
+  <div class="modal-foot">
+    <button type="button" class="btn btn-ghost" onclick="closeModal()">Fermer</button>
+    <button type="button" class="btn btn-primary"
+            id="voir-btn-modifier" onclick="passerEnModeModification()">
+      ✎ Modifier
+    </button>
+  </div>
 </div>
-
-<script>
-  
-  document.getElementById('btn-type-physique').disabled = true;
-  document.getElementById('btn-type-morale').disabled = true;
-
-  function setTypeClient(type) {
-    document.getElementById('type_client').value = type;
-    document.getElementById('section-physique').style.display = type === 'physique' ? 'block' : 'none';
-    document.getElementById('section-morale').style.display   = type === 'morale'   ? 'block' : 'none';
-    document.getElementById('btn-type-physique').className =
-      'btn ' + (type === 'physique' ? 'btn-primary' : 'btn-ghost');
-    document.getElementById('btn-type-morale').className =
-      'btn ' + (type === 'morale'   ? 'btn-primary' : 'btn-ghost');
-  }
-  function resetClientForm() {
-    const form = document.getElementById('form-add-client');
-
-    // reset natif
-    form.reset();
-
-    // reset manuel (sécurité)
-    form.querySelectorAll('input').forEach(i => i.value = '');
-    form.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-
-  }
-  function closeModal() {
-    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-
-    // 🔥 reset après fermeture
-    resetClientForm();
-  }
-</script>

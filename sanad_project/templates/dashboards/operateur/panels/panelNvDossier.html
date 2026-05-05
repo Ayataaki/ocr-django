@@ -1,240 +1,250 @@
-<!-- ENHANCED PANEL: Nouveau Dossier -->
+{% comment %}
+  ENHANCED PANEL: Nouveau Dossier
+  Template: panel_nouveau.html
+  Requires: panel_nouveau.css + panel_nouveau.js
+{% endcomment %}
+
 <div class="panel {% if active_panel == 'nouveau' %}active{% endif %}" id="panel-nouveau">
-    <div class="card">
-        <div class="card-body">
+  <div class="pn-wrap">
 
-            <!-- Modernized Header -->
-            <div class="enhanced-section-header">
-                <div class="enhanced-section-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
-                </div>
-                <div class="enhanced-section-text">
-                    <span class="enhanced-section-title">Nouveau dossier</span>
-                    <span class="enhanced-section-subtitle">Créez un dossier pour un client existant ou nouveau</span>
-                </div>
-            </div>
+    <!-- ══════════════════════════════════════
+         STEP 1 — CLIENT
+    ══════════════════════════════════════ -->
+    <section class="pn-section" id="step-client">
 
-            <!-- Client Information Card (Integrated) -->
-            <div class="form-section">
-
-                <div class="form-section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    Informations client
-                </div>
-                
-                <div class="form-grid" style="margin-bottom:12px">
-                    <div class="field" style="grid-column:1/-1">
-                        <label>Sélectionner un client</label>
-                        <div style="display:flex;gap:8px">
-                            <!-- <select id="client-select" style="flex:1" onchange="ClientDetail.load(this.value)"> -->
-                                
-                            <!-- <select id="client-select" style="flex:1" onchange="ClientDetail.onClientChange(this.value)"> -->
-                            <select id="client-select" style="flex:1" onchange="PanelNouveau.onClientChange(this.value)">
-                                <option value="">-- Choisir --</option>
-                                {% for client in clients %}
-                                <option value="{{ client.id }}">
-                                    {% if client.personne_physique %}
-                                    {{ client.personne_physique.nom }} {{ client.personne_physique.prenom }}
-                                    — {{ client.personne_physique.numero_identite }}
-                                    {% elif client.personne_morale %}
-                                    {{ client.personne_morale.raison_sociale }}
-                                    — {{ client.personne_morale.ice|default:client.personne_morale.numero_rc }}
-                                    {% endif %}
-                                </option>
-                                {% endfor %}
-                            </select>
-
-                            <button type="button" class="btn btn-ghost btn-sm"
-                                    onclick="openModal('add-client')">
-                            + Nouveau client
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="client-detail-container" style="display:none">
-                    <div class="dossier-fiche">
-                        <div class="dossier-fiche-header">
-                        <div>
-                            <span id="client-nom"  class="dossier-fiche-value mono"></span>
-                            <span id="client-cin"  class="dossier-fiche-label"></span>
-                        </div>
-                        <span id="client-type-badge" class="badge"></span>
-                        <button type="button" onclick="PanelNouveau.resetClient()">✕</button>
-                        </div>
-                        <div class="dossier-fiche-body">
-                        <div class="dossier-fiche-field">
-                            <span class="dossier-fiche-label">Email</span>
-                            <span id="client-email" class="dossier-fiche-value"></span>
-                        </div>
-                        <div class="dossier-fiche-field">
-                            <span class="dossier-fiche-label">Téléphone</span>
-                            <span id="client-tel" class="dossier-fiche-value"></span>
-                        </div>
-                        <div class="dossier-fiche-field full">
-                            <span class="dossier-fiche-label">Adresse</span>
-                            <span id="client-adresse" class="dossier-fiche-value"></span>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Dossier Information Card -->
-            <div class="form-section">
-                <div class="form-section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                    Informations du dossier
-                </div>
-                
-                <div class="form-grid">
-                    <!-- Sélecteur de dossier -->
-                    <div class="field" style="grid-column:1/-1">
-                        <label>Sélectionner un dossier</label>                        
-                        <div style="display:flex;gap:8px">
-                            <!-- <select id="dossier-select" style="flex:1"
-                                    onchange="DossierDetail.load(this.value)">
-                                <option value="">-- Choisir un dossier --</option>
-                                {% for dossier in dossiers %}
-                                <option value="{{ dossier.id }}">
-                                    {{ dossier.reference_dossier }} 
-                                    {% if dossier.date_ouverture %}
-                                    — Ouvert le {{ dossier.date_ouverture|date:"d/m/Y" }}
-                                    {% endif %}
-                                </option>
-                                {% endfor %}
-                            </select> -->
-                            <!-- <select id="dossier-select" style="flex:1" onchange="ClientDetail.loadDossier(this.value)"> -->
-                            <select id="dossier-select" style="flex:1" onchange="PanelNouveau.onDossierChange(this.value)">
-
-                                <option value="">-- Choisir un dossier --</option>
-                            </select>
-                            <button type="button" class="btn btn-ghost btn-sm"
-                                    onclick="openModal('add-dossier')">
-                                + Nouveau dossier
-                            </button>
-                        </div>
-                    </div>     
-                                 
-                </div>
-                
-                <!-- Conteneur pour les détails du dossier sélectionné
-                <div id="dossier-detail-container" style="display:none"></div> -->
-
-                <!-- Fiche dossier — champs statiques avec id -->
-                <div id="dossier-fiche" style="display:none" class="dossier-fiche">
-                    <div class="dossier-fiche-header">
-                        <div class="dossier-fiche-ref">
-                        <span class="dossier-fiche-label">Référence</span>
-                        <span id="dossier-reference" class="dossier-fiche-value mono"></span>
-                        </div>
-                        <span id="dossier-statut-badge" class="badge-statut"></span>
-                        <button type="button" onclick="PanelNouveau.onDossierChange(null)">✕</button>
-                    </div>
-                    <div class="dossier-fiche-body">
-                        <div class="dossier-fiche-field">
-                        <span class="dossier-fiche-label">Date d'ouverture</span>
-                        <span id="dossier-date-ouverture" class="dossier-fiche-value"></span>
-                        </div>
-                        <div class="dossier-fiche-field">
-                        <span class="dossier-fiche-label">Enregistré le</span>
-                        <span id="dossier-date-creation" class="dossier-fiche-value"></span>
-                        </div>
-                        <div class="dossier-fiche-field full">
-                        <span class="dossier-fiche-label">Description</span>
-                        <span id="dossier-description" class="dossier-fiche-value"></span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Document Scan Card -->
-            <div class="form-section">
-                <div class="form-section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    Document à numériser
-                </div>
-                <!-- Enhanced Upload Zone -->
-                <div class="enhanced-upload-zone" onclick="simulateScan()">
-                    <div class="upload-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                    </div>
-                    <p>Glisser le fichier ou cliquer pour scanner</p>
-                    <small>PDF, JPG, PNG — max 50 Mo par fichier</small>
-                </div>
-
-                <!-- Enhanced Scan Preview -->
-                <div id="scan-preview" style="display:none;">
-                    <div class="file-preview">
-                        <div class="file-info">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                <polyline points="14 2 14 8 20 8" />
-                            </svg>
-                            <div>
-                                <div class="file-name">BENALI_acte_2026.pdf</div>
-                                <div class="file-meta">3 pages • 1.2 Mo • 300 DPI</div>
-                            </div>
-                        </div>
-                        <span class="badge badge-success">Prêt pour OCR</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Keywords Card -->
-            <div class="form-section">
-                <div class="form-section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                        <line x1="7" y1="7" x2="7.01" y2="7" />
-                    </svg>
-                    Mots-clés & indexation
-                </div>
-                <div class="form-grid">
-                    <div class="field full-width">
-                        <label>Mots-clés manuels</label>
-                        <input placeholder="Ex: vente, appartement, Casablanca, 2026..." />
-                    </div>
-                </div>
-                <div id="auto-keywords" style="display:none; margin-top: 12px;">
-                    <div class="auto-keywords-label">Mots-clés extraits automatiquement par OCR :</div>
-                    <div class="keyword-tags-list">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button type="button" class="btn btn-ghost" onclick="switchPanel('op','dashboard')">
-                    Annuler
-                </button>
-                <button type="submit" class="btn btn-primary" onclick="submitDossier()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                    </svg>
-                    Enregistrer & Lancer OCR
-                </button>
-            </div>
-
+      <div class="pn-section-header">
+        <span class="pn-step-num">01</span>
+        <div class="pn-section-meta">
+          <h2 class="pn-section-title">Client</h2>
+          <p class="pn-section-sub">Sélectionnez ou créez un client</p>
         </div>
+      </div>
+
+      <!-- Search + Add row -->
+      <div class="pn-row">
+        <div class="pn-search-wrap">
+          <svg class="pn-search-icon" viewBox="0 0 20 20" fill="none">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input
+            id="client-search"
+            class="pn-input"
+            type="text"
+            placeholder="Nom, prénom, CIN, ICE…"
+            autocomplete="off"
+            oninput="PanelNouveau.onSearchInput(this.value)"
+            onfocus="PanelNouveau.onSearchFocus()"
+          />
+          <button class="pn-clear-btn" id="client-clear-btn"
+                  onclick="PanelNouveau.resetClient()" title="Effacer">
+            <svg viewBox="0 0 16 16" fill="none">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <button class="pn-btn-add" onclick="openModal('add-client')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Nouveau client
+        </button>
+      </div>
+
+      <!-- Dropdown list -->
+      <div class="pn-dropdown" id="client-dropdown" role="listbox" aria-label="Résultats clients">
+        <!-- JS renders <div class="pn-dropdown-item" role="option"> -->
+      </div>
+
+      <!-- Client fiche (shown after selection) -->
+      <div class="pn-fiche" id="client-fiche" style="display:none" aria-live="polite">
+        <div class="pn-fiche-left">
+          <div class="pn-avatar" id="client-avatar"></div>
+          <div>
+            <div class="pn-fiche-name" id="client-nom"></div>
+            <div class="pn-fiche-sub"  id="client-cin"></div>
+          </div>
+        </div>
+        <div class="pn-fiche-right">
+          <span class="pn-badge" id="client-type-badge"></span>
+          <button class="pn-fiche-close" onclick="PanelNouveau.resetClient()" title="Changer">
+            <svg viewBox="0 0 16 16" fill="none">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="pn-fiche-fields">
+          <div class="pn-fiche-field">
+            <span class="pn-label">Email</span>
+            <span class="pn-value" id="client-email"></span>
+          </div>
+          <div class="pn-fiche-field">
+            <span class="pn-label">Téléphone</span>
+            <span class="pn-value" id="client-tel"></span>
+          </div>
+          <div class="pn-fiche-field pn-fiche-field--full">
+            <span class="pn-label">Adresse</span>
+            <span class="pn-value" id="client-adresse"></span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         STEP 2 — DOSSIER
+    ══════════════════════════════════════ -->
+    <section class="pn-section pn-section--locked" id="step-dossier" aria-disabled="true">
+
+      <div class="pn-section-header">
+        <span class="pn-step-num">02</span>
+        <div class="pn-section-meta">
+          <h2 class="pn-section-title">Dossier</h2>
+          <p class="pn-section-sub">Choisissez ou créez un dossier</p>
+        </div>
+      </div>
+
+      <!-- Dossier list -->
+      <div class="pn-dossier-grid" id="dossier-grid">
+        <!-- État vide par défaut -->
+        <div class="pn-dossier-empty" id="dossier-empty">
+          <svg viewBox="0 0 48 48" fill="none">
+            <rect x="8" y="14" width="32" height="26" rx="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 20h32" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M16 8l4 6h12l4-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          <span>Sélectionnez un client pour voir ses dossiers</span>
+        </div>
+        <!-- JS injecte les cartes dossier ici -->
+      </div>
+
+      <!-- Add dossier button -->
+      <div class="pn-dossier-add-wrap" id="dossier-add-wrap" style="display:none">
+        <button class="pn-btn-add" onclick="openModal('add-dossier')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Nouveau dossier
+        </button>
+      </div>
+
+      <!-- Dossier fiche (shown after selection) -->
+      <div class="pn-fiche pn-fiche--dossier" id="dossier-fiche" style="display:none" aria-live="polite">
+        <div class="pn-fiche-left">
+          <div class="pn-avatar pn-avatar--dossier">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div>
+            <div class="pn-fiche-name mono" id="dossier-reference"></div>
+            <div class="pn-fiche-sub"      id="dossier-date-ouverture"></div>
+          </div>
+        </div>
+        <div class="pn-fiche-right">
+          <span class="pn-statut-badge" id="dossier-statut-badge"></span>
+          <button class="pn-fiche-close" onclick="PanelNouveau.onDossierChange(null)" title="Changer">
+            <svg viewBox="0 0 16 16" fill="none">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="pn-fiche-fields">
+          <div class="pn-fiche-field">
+            <span class="pn-label">Enregistré le</span>
+            <span class="pn-value" id="dossier-date-creation"></span>
+          </div>
+          <div class="pn-fiche-field pn-fiche-field--full">
+            <span class="pn-label">Description</span>
+            <span class="pn-value" id="dossier-description"></span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         STEP 3 — DOCUMENT / OCR
+    ══════════════════════════════════════ -->
+    <section class="pn-section pn-section--locked" id="step-document" aria-disabled="true">
+
+      <div class="pn-section-header">
+        <span class="pn-step-num">03</span>
+        <div class="pn-section-meta">
+          <h2 class="pn-section-title">Document</h2>
+          <p class="pn-section-sub">Déposez le fichier à numériser</p>
+        </div>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="pn-dropzone" id="pn-dropzone"
+           ondragover="PanelNouveau.onDragOver(event)"
+           ondragleave="PanelNouveau.onDragLeave(event)"
+           ondrop="PanelNouveau.onDrop(event)"
+           onclick="document.getElementById('pn-file-input').click()">
+        <div class="pn-dropzone-inner">
+          <div class="pn-drop-icon">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M24 32V16M16 24l8-8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 36v2a2 2 0 0 0 2 2h28a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="pn-drop-title">Glissez votre fichier ici</p>
+          <p class="pn-drop-hint">PDF, JPG, PNG · max 50 Mo</p>
+        </div>
+        <input type="file" id="pn-file-input" accept=".pdf,.jpg,.jpeg,.png"
+               style="display:none" onchange="PanelNouveau.onFileSelect(this.files)"/>
+      </div>
+
+      <!-- File preview (appears after drop) -->
+      <div class="pn-file-preview" id="pn-file-preview" style="display:none">
+        <div class="pn-file-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div class="pn-file-info">
+          <span class="pn-file-name" id="pn-file-name"></span>
+          <span class="pn-file-meta" id="pn-file-meta"></span>
+        </div>
+        <span class="pn-badge pn-badge--green">Prêt pour OCR</span>
+        <button class="pn-fiche-close" onclick="PanelNouveau.removeFile()" title="Retirer">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Keywords -->
+      <div class="pn-keywords-wrap" id="pn-keywords-wrap">
+        <div class="pn-label" style="margin-bottom:6px">Mots-clés manuels</div>
+        <input id="pn-keywords-input" class="pn-input" type="text"
+               placeholder="vente, appartement, Casablanca, 2026…"/>
+        <div class="pn-auto-kw" id="pn-auto-kw" style="display:none">
+          <span class="pn-label">Extraits par OCR</span>
+          <div class="pn-tag-list" id="pn-tag-list"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         ACTIONS
+    ══════════════════════════════════════ -->
+    <div class="pn-actions">
+      <button type="button" class="pn-btn-ghost" onclick="switchPanel('op','dashboard')">
+        Annuler
+      </button>
+      <button type="button" class="pn-btn-primary" id="pn-submit-btn"
+              onclick="PanelNouveau.submit()" disabled>
+        <svg viewBox="0 0 20 20" fill="none">
+          <polygon points="10 2 2 11 9 11 8.5 18 18 9 11 9" fill="currentColor"/>
+        </svg>
+        Enregistrer &amp; Lancer OCR
+      </button>
     </div>
+
+  </div>
 </div>

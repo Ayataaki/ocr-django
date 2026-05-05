@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import JsonResponse
+from django.db import transaction
 from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -84,6 +85,105 @@ def client_detail_api(request, client_id):
         }
 
     return JsonResponse(data)
+
+def client_update(request, client_id):
+    """
+    POST /accounts/clients/<client_id>/modifier/
+    Met à jour Client + PersonnePhysique ou PersonneMorale.
+    """
+    client = get_object_or_404(
+        Client.objects.select_related('personne_physique', 'personne_morale'),
+        pk=client_id
+    )
+
+    if request.method != 'POST':
+        return redirect('admin_dashboard')
+
+    try:
+        commun = _extraire_client_commun(request)
+
+        with transaction.atomic():
+
+            # ── Mettre à jour les champs communs du Client ──
+            for champ, valeur in commun.items():
+                setattr(client, champ, valeur)
+            client.save()
+
+            # ── Mettre à jour la sous-entité selon le type ──
+            if client.type_client == 'physique' and client.personne_physique:
+                champs = _extraire_physique(request)
+                for champ, valeur in champs.items():
+                    setattr(client.personne_physique, champ, valeur)
+                client.personne_physique.save()
+
+            elif client.type_client == 'morale' and client.personne_morale:
+                champs = _extraire_morale(request)
+                for champ, valeur in champs.items():
+                    setattr(client.personne_morale, champ, valeur)
+                client.personne_morale.save()
+
+        messages.success(request, "Client modifié avec succès.")
+        return redirect('admin_dashboard')
+
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect('admin_dashboard')
+
+    except Exception as e:
+        messages.error(request, f"Erreur inattendue : {e}")
+        return redirect('admin_dashboard')
+
+def _extraire_client_commun(request):
+    return {
+        'email':      _get(request, 'email'),
+        'telephone':  _get(request, 'telephone'),
+        'adresse':    _get(request, 'adresse'),
+        'ville':      _get(request, 'ville'),
+        'code_postal':_get(request, 'code_postal'),
+        'pays':       _get(request, 'pays') or 'Maroc',
+    }
+
+def _extraire_physique(request):
+    nom             = _get(request, 'nom')
+    prenom          = _get(request, 'prenom')
+    numero_identite = _get(request, 'numero_identite')
+    if not all([nom, prenom, numero_identite]):
+        raise ValueError("Nom, prénom et numéro d'identité sont obligatoires.")
+    return {
+        'nom':                nom,
+        'prenom':             prenom,
+        'type_identite':      _get(request, 'type_identite'),
+        'numero_identite':    numero_identite,
+        'nationalite':        _get(request, 'nationalite'),
+        'profession':         _get(request, 'profession'),
+        'date_naissance':     request.POST.get('date_naissance') or None,
+        'lieu_naissance':     _get(request, 'lieu_naissance'),
+        'situation_familiale':_get(request, 'situation_familiale'),
+    }
+
+def _extraire_morale(request):
+    raison_sociale = _get(request, 'raison_sociale')
+    if not raison_sociale:
+        raise ValueError("La raison sociale est obligatoire.")
+    capital = request.POST.get('capital_social') or None
+    if capital:
+        try: capital = float(capital)
+        except ValueError: capital = None
+    return {
+        'raison_sociale':        raison_sociale,
+        'sigle':                 _get(request, 'sigle'),
+        'type_societe':          _get(request, 'type_societe'),
+        'numero_rc':             _get(request, 'numero_rc'),
+        'numero_patente':        _get(request, 'numero_patente'),
+        'identifiant_fiscal':    _get(request, 'identifiant_fiscal'),
+        'numero_cnss':           _get(request, 'numero_cnss'),
+        'ice':                   _get(request, 'ice'),
+        'representant_nom':      _get(request, 'representant_nom'),
+        'representant_prenom':   _get(request, 'representant_prenom'),
+        'representant_fonction': _get(request, 'representant_fonction'),
+        'capital_social':        capital,
+        'date_creation_societe': request.POST.get('date_creation_societe') or None,
+    }
 
 # def client_detail_api(request, client_id):
 

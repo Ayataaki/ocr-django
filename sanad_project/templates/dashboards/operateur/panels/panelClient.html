@@ -76,7 +76,193 @@
 </div>
 
 <script>
+
+  function voirClient(clientId) {
+
+    // Stocker l'id pour le bouton "Modifier"
+    document.getElementById('voir-btn-modifier')
+            .dataset.clientId = clientId;
+
+    // Afficher le modal immédiatement avec un état de chargement
+    openModal('voir-client');
+    remplirChamp('voir-email', 'Chargement...');
+
+    fetch(`/accounts/clients/${clientId}/`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => remplirModalVoir(data))
+      .catch(() => {
+        remplirChamp('voir-email', 'Erreur de chargement');
+      });
+  }
+
+  function remplirChamp(id, valeur) {
+    const el = document.getElementById(id);
+    if (el) el.value = valeur || '';
+  }
+
+  function remplirModalVoir(data) {
+
+    // ── Champs communs ──
+    remplirChamp('voir-email',     data.email);
+    remplirChamp('voir-telephone', data.telephone);
+    remplirChamp('voir-adresse',   data.adresse);
+    remplirChamp('voir-ville',     data.ville);
+    remplirChamp('voir-pays',      data.pays);
+
+    // ── Basculer les sections et boutons selon le type ──
+    const estPhysique = data.type_client === 'physique';
+
+    document.getElementById('voir-section-physique').style.display =
+      estPhysique ? 'block' : 'none';
+    document.getElementById('voir-section-morale').style.display =
+      estPhysique ? 'none' : 'block';
+
+    document.getElementById('voir-btn-physique').className =
+      'btn ' + (estPhysique ? 'btn-primary' : 'btn-ghost');
+    document.getElementById('voir-btn-morale').className =
+      'btn ' + (estPhysique ? 'btn-ghost' : 'btn-primary');
+
+    // ── Champs personne physique ──
+    if (estPhysique && data.personne_physique) {
+      const pp = data.personne_physique;
+      remplirChamp('voir-nom',               pp.nom);
+      remplirChamp('voir-prenom',            pp.prenom);
+      remplirChamp('voir-type-identite',     pp.type_identite);
+      remplirChamp('voir-numero-identite',   pp.numero_identite);
+      remplirChamp('voir-nationalite',       pp.nationalite);
+      remplirChamp('voir-profession',        pp.profession);
+      remplirChamp('voir-date-naissance',    pp.date_naissance);
+      remplirChamp('voir-lieu-naissance',    pp.lieu_naissance);
+      remplirChamp('voir-situation-familiale', pp.situation_familiale);
+    }
+
+    // ── Champs personne morale ──
+    if (!estPhysique && data.personne_morale) {
+      const pm = data.personne_morale;
+      remplirChamp('voir-raison-sociale',       pm.raison_sociale);
+      remplirChamp('voir-sigle',                pm.sigle);
+      remplirChamp('voir-type-societe',         pm.type_societe);
+      remplirChamp('voir-numero-rc',            pm.numero_rc);
+      remplirChamp('voir-ice',                  pm.ice);
+      remplirChamp('voir-identifiant-fiscal',   pm.identifiant_fiscal);
+      remplirChamp('voir-numero-patente',       pm.numero_patente);
+      remplirChamp('voir-capital-social',
+        pm.capital_social
+          ? `${Number(pm.capital_social).toLocaleString('fr-FR')} ${pm.devise}`
+          : '');
+      remplirChamp('voir-representant-nom',     pm.representant_nom);
+      remplirChamp('voir-representant-prenom',  pm.representant_prenom);
+      remplirChamp('voir-representant-fonction',pm.representant_fonction);
+      remplirChamp('voir-date-creation-societe',pm.date_creation_societe);
+    }
+  }
+
+  // Bouton "Modifier" dans le modal voir → ouvre le modal d'édition
+  function passerEnModeModification() {
+    const clientId = document.getElementById('voir-btn-modifier').dataset.clientId;
+    closeModal();
+    modifierClient(clientId);
+  }
   
+  /**
+ * Ouvre le modal d'édition et le pré-remplit avec les données du client.
+ * Appelé par le bouton ✎ dans panelClient.html.
+ *
+ * @param {number} clientId
+ */
+function modifierClient(clientId) {
+
+  fetch(`/accounts/clients/${clientId}/`)
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    })
+    .then(data => {
+      prefillEditModal(clientId, data);
+      openModal('edit-client');
+    })
+    .catch(() => alert('Impossible de charger les données du client.'));
+}
+
+/**
+ * Pré-remplit tous les champs du modal edit.
+ *
+ * @param {number} clientId
+ * @param {object} data  — JSON retourné par client_detail_api
+ */
+function prefillEditModal(clientId, data) {
+
+  // Pointer le form vers la bonne URL
+  const form = document.getElementById('form-edit-client');
+  form.action = `/accounts/clients/${clientId}/modifier/`;
+
+  // Raccourci : remplir un champ par son id
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val || '';
+  };
+
+  // ── Champs communs ──
+  set('edit-email',       data.email);
+  set('edit-telephone',   data.telephone);
+  set('edit-adresse',     data.adresse);
+  set('edit-ville',       data.ville);
+  set('edit-code-postal', data.code_postal);
+  set('edit-pays',        data.pays);
+
+  // ── Type client ──
+  document.getElementById('edit-type-client').value = data.type_client;
+
+  const estPhysique = data.type_client === 'physique';
+
+  // Afficher la bonne section
+  document.getElementById('edit-section-physique').style.display =
+    estPhysique ? 'block' : 'none';
+  document.getElementById('edit-section-morale').style.display =
+    estPhysique ? 'none' : 'block';
+
+  // Mettre le bon bouton en actif (visuel uniquement, tous disabled)
+  document.getElementById('edit-btn-physique').className =
+    'btn ' + (estPhysique ? 'btn-primary' : 'btn-ghost');
+  document.getElementById('edit-btn-morale').className =
+    'btn ' + (estPhysique ? 'btn-ghost' : 'btn-primary');
+
+  // ── Personne physique ──
+  if (estPhysique && data.personne_physique) {
+    const pp = data.personne_physique;
+    set('edit-nom',                pp.nom);
+    set('edit-prenom',             pp.prenom);
+    set('edit-type-identite',      pp.type_identite);
+    set('edit-numero-identite',    pp.numero_identite);
+    set('edit-nationalite',        pp.nationalite);
+    set('edit-profession',         pp.profession);
+    set('edit-date-naissance',     pp.date_naissance);
+    set('edit-lieu-naissance',     pp.lieu_naissance);
+    set('edit-situation-familiale',pp.situation_familiale);
+  }
+
+  // ── Personne morale ──
+  if (!estPhysique && data.personne_morale) {
+    const pm = data.personne_morale;
+    set('edit-raison-sociale',         pm.raison_sociale);
+    set('edit-sigle',                  pm.sigle);
+    set('edit-type-societe',           pm.type_societe);
+    set('edit-numero-rc',              pm.numero_rc);
+    set('edit-ice',                    pm.ice);
+    set('edit-identifiant-fiscal',     pm.identifiant_fiscal);
+    set('edit-numero-patente',         pm.numero_patente);
+    set('edit-numero-cnss',            pm.numero_cnss);
+    set('edit-capital-social',         pm.capital_social);
+    set('edit-representant-nom',       pm.representant_nom);
+    set('edit-representant-prenom',    pm.representant_prenom);
+    set('edit-representant-fonction',  pm.representant_fonction);
+    set('edit-date-creation-societe',  pm.date_creation_societe);
+  }
+}
   function setTypeClient(type) {
     document.getElementById('type_client').value = type;
 
@@ -93,72 +279,72 @@
       'btn ' + (type === 'morale' ? 'btn-primary' : 'btn-ghost');
   }
 
-  function voirClient(clientId) {
+  // function voirClient(clientId) {
 
-  fetch(`/accounts/clients/${clientId}/`)
-    .then(res => {
-      if (!res.ok) throw new Error("Erreur API");
-      return res.json();
-    })
-    .then(data => {
+  // fetch(`/accounts/clients/${clientId}/`)
+  //   .then(res => {
+  //     if (!res.ok) throw new Error("Erreur API");
+  //     return res.json();
+  //   })
+  //   .then(data => {
 
-      const modal = document.getElementById('modal-voir-client');      
+  //     const modal = document.getElementById('modal-voir-client');      
 
-      // 👉 1. Remplir les champs communs
-      modal.querySelector('[name="email"]').value = data.email || '';
-      modal.querySelector('[name="telephone"]').value = data.telephone || '';
-      modal.querySelector('[name="adresse"]').value = data.adresse || '';
-      modal.querySelector('[name="ville"]').value = data.ville || '';
-      modal.querySelector('[name="pays"]').value = data.pays || '';
+  //     // 👉 1. Remplir les champs communs
+  //     modal.querySelector('[name="email"]').value = data.email || '';
+  //     modal.querySelector('[name="telephone"]').value = data.telephone || '';
+  //     modal.querySelector('[name="adresse"]').value = data.adresse || '';
+  //     modal.querySelector('[name="ville"]').value = data.ville || '';
+  //     modal.querySelector('[name="pays"]').value = data.pays || '';
 
-      // 👉 2. Type client
-      setTypeClient(data.type_client);
+  //     // 👉 2. Type client
+  //     setTypeClient(data.type_client);
 
-      // 👉 3. Physique
-      if (data.type_client === 'physique' && data.personne_physique) {
-        const pp = data.personne_physique;
+  //     // 👉 3. Physique
+  //     if (data.type_client === 'physique' && data.personne_physique) {
+  //       const pp = data.personne_physique;
 
-        modal.querySelector('[name="nom"]').value = pp.nom || '';
-        modal.querySelector('[name="prenom"]').value = pp.prenom || '';
-        modal.querySelector('[name="type_identite"]').value = pp.type_identite || '';
-        modal.querySelector('[name="numero_identite"]').value = pp.numero_identite || '';
-        modal.querySelector('[name="nationalite"]').value = pp.nationalite || '';
-        modal.querySelector('[name="profession"]').value = pp.profession || '';
-        modal.querySelector('[name="date_naissance"]').value = pp.date_naissance || '';
-        modal.querySelector('[name="lieu_naissance"]').value = pp.lieu_naissance || '';
-        modal.querySelector('[name="situation_familiale"]').value = pp.situation_familiale || '';
-      }
+  //       modal.querySelector('[name="nom"]').value = pp.nom || '';
+  //       modal.querySelector('[name="prenom"]').value = pp.prenom || '';
+  //       modal.querySelector('[name="type_identite"]').value = pp.type_identite || '';
+  //       modal.querySelector('[name="numero_identite"]').value = pp.numero_identite || '';
+  //       modal.querySelector('[name="nationalite"]').value = pp.nationalite || '';
+  //       modal.querySelector('[name="profession"]').value = pp.profession || '';
+  //       modal.querySelector('[name="date_naissance"]').value = pp.date_naissance || '';
+  //       modal.querySelector('[name="lieu_naissance"]').value = pp.lieu_naissance || '';
+  //       modal.querySelector('[name="situation_familiale"]').value = pp.situation_familiale || '';
+  //     }
 
-      // 👉 4. Morale
-      if (data.type_client === 'morale' && data.personne_morale) {
-        const pm = data.personne_morale;
+  //     // 👉 4. Morale
+  //     if (data.type_client === 'morale' && data.personne_morale) {
+  //       const pm = data.personne_morale;
 
-        modal.querySelector('[name="raison_sociale"]').value = pm.raison_sociale || '';
-        modal.querySelector('[name="sigle"]').value = pm.sigle || '';
-        modal.querySelector('[name="type_societe"]').value = pm.type_societe || '';
-        modal.querySelector('[name="numero_rc"]').value = pm.numero_rc || '';
-        modal.querySelector('[name="ice"]').value = pm.ice || '';
-        modal.querySelector('[name="identifiant_fiscal"]').value = pm.identifiant_fiscal || '';
-        modal.querySelector('[name="numero_patente"]').value = pm.numero_patente || '';
-        modal.querySelector('[name="capital_social"]').value = pm.capital_social || '';
+  //       modal.querySelector('[name="raison_sociale"]').value = pm.raison_sociale || '';
+  //       modal.querySelector('[name="sigle"]').value = pm.sigle || '';
+  //       modal.querySelector('[name="type_societe"]').value = pm.type_societe || '';
+  //       modal.querySelector('[name="numero_rc"]').value = pm.numero_rc || '';
+  //       modal.querySelector('[name="ice"]').value = pm.ice || '';
+  //       modal.querySelector('[name="identifiant_fiscal"]').value = pm.identifiant_fiscal || '';
+  //       modal.querySelector('[name="numero_patente"]').value = pm.numero_patente || '';
+  //       modal.querySelector('[name="capital_social"]').value = pm.capital_social || '';
 
-        modal.querySelector('[name="representant_nom"]').value = pm.representant_nom || '';
-        modal.querySelector('[name="representant_prenom"]').value = pm.representant_prenom || '';
-        modal.querySelector('[name="representant_fonction"]').value = pm.representant_fonction || '';
-        modal.querySelector('[name="date_creation_societe"]').value = pm.date_creation_societe || '';
-      }
+  //       modal.querySelector('[name="representant_nom"]').value = pm.representant_nom || '';
+  //       modal.querySelector('[name="representant_prenom"]').value = pm.representant_prenom || '';
+  //       modal.querySelector('[name="representant_fonction"]').value = pm.representant_fonction || '';
+  //       modal.querySelector('[name="date_creation_societe"]').value = pm.date_creation_societe || '';
+  //     }
 
-      setModalViewMode();
+  //     setModalViewMode();
 
-      // 👉 5. ouvrir modal
-      openModal('voir-client');
+  //     // 👉 5. ouvrir modal
+  //     openModal('voir-client');
 
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Impossible de charger le client");
-    });
-  }
+  //   })
+  //   .catch(err => {
+  //     console.error(err);
+  //     alert("Impossible de charger le client");
+  //   });
+  // }
 
   function setModalViewMode() {
 
