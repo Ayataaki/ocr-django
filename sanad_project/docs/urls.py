@@ -12,6 +12,7 @@ urlpatterns = [
     path("dossiers/clients/<int:client_id>/", views.dossier.dossiers_par_client, name="dossiers_par_client"),
 
     path("documents/", views.document.dossier_list, name="document_list"),
+    path("documents/nouveau", views.document.create_document, name="document_ajout"),
 
 ]
 
