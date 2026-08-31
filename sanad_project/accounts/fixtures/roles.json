@@ -1,0 +1,5 @@
+[
+  {"model": "accounts.role", "pk": 1, "fields": {"nom": "admin", "description": "Administrateur"}},
+  {"model": "accounts.role", "pk": 2, "fields": {"nom": "operateur", "description": "Opérateur"}},
+  {"model": "accounts.role", "pk": 3, "fields": {"nom": "superviseur", "description": "Superviseur"}}
+]

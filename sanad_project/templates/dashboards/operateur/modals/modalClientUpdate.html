@@ -1,29 +1,35 @@
-<div class="modal" id="modal-add-client" style="display:none;max-width:600px">
+<!-- ══════════════════════════════════════════
+     MODAL — Modifier un client
+     IDs préfixés "edit-" pour éviter les conflits
+     Ouvert par modifierClient(clientId) dans panelClient.html
+════════════════════════════════════════════ -->
+<div class="modal" id="modal-edit-client" style="display:none;max-width:600px">
+
   <div class="modal-head">
-    <h3>Nouveau client</h3>
-    <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    <h3>Modifier le client</h3>
+    <button type="button" class="btn btn-ghost btn-icon"
+            onclick="closeModal()">✕</button>
   </div>
 
-  <form method="POST" action="{% url 'ajout_client_admin' %}" id="form-add-client">
+  <form id="form-edit-client" method="POST">
     {% csrf_token %}
+
     <div class="modal-body">
 
-      <!-- Sélecteur de type -->
+      <!-- Sélecteur de type — lecture seule en modification -->
       <div style="display:flex;gap:8px;margin-bottom:18px">
-        <button type="button" id="btn-type-physique"
-                class="btn btn-primary" style="flex:1"
-                onclick="setTypeClient('physique')">
+        <button type="button" id="edit-btn-physique"
+                class="btn btn-primary" style="flex:1" disabled>
           Personne physique
         </button>
-        <button type="button" id="btn-type-morale"
-                class="btn btn-ghost" style="flex:1"
-                onclick="setTypeClient('morale')">
+        <button type="button" id="edit-btn-morale"
+                class="btn btn-ghost" style="flex:1" disabled>
           Personne morale
         </button>
-        <input type="hidden" name="type_client" id="type_client" value="physique"/>
+        <input type="hidden" name="type_client" id="edit-type-client"/>
       </div>
 
-      <!-- Champs communs -->
+      <!-- ── Coordonnées ── -->
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
                   color:var(--text3);margin-bottom:10px;font-weight:500">
         Coordonnées
@@ -31,28 +37,32 @@
       <div class="form-grid" style="margin-bottom:16px">
         <div class="field">
           <label>Email *</label>
-          <input name="email" type="email" placeholder="email@exemple.ma" required/>
+          <input id="edit-email" name="email" type="email" required/>
         </div>
         <div class="field">
           <label>Téléphone</label>
-          <input name="telephone" placeholder="06 XX XX XX XX"/>
+          <input id="edit-telephone" name="telephone"/>
         </div>
         <div class="field full">
           <label>Adresse</label>
-          <input name="adresse" placeholder="Adresse complète"/>
+          <input id="edit-adresse" name="adresse"/>
         </div>
         <div class="field">
           <label>Ville</label>
-          <input name="ville" placeholder="Casablanca"/>
+          <input id="edit-ville" name="ville"/>
+        </div>
+        <div class="field">
+          <label>Code postal</label>
+          <input id="edit-code-postal" name="code_postal"/>
         </div>
         <div class="field">
           <label>Pays</label>
-          <input name="pays" value="Maroc"/>
+          <input id="edit-pays" name="pays"/>
         </div>
       </div>
 
       <!-- ── Personne physique ── -->
-      <div id="section-physique">
+      <div id="edit-section-physique" style="display:none">
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
                     color:var(--text3);margin-bottom:10px;font-weight:500">
           Identité
@@ -60,15 +70,15 @@
         <div class="form-grid" style="margin-bottom:16px">
           <div class="field">
             <label>Nom *</label>
-            <input name="nom" placeholder="Nom de famille"/>
+            <input id="edit-nom" name="nom"/>
           </div>
           <div class="field">
             <label>Prénom *</label>
-            <input name="prenom" placeholder="Prénom"/>
+            <input id="edit-prenom" name="prenom"/>
           </div>
           <div class="field">
-            <label>Type d'identité *</label>
-            <select name="type_identite">
+            <label>Type d'identité</label>
+            <select id="edit-type-identite" name="type_identite">
               <option value="">-- Choisir --</option>
               <option value="CIN">CIN</option>
               <option value="Passeport">Passeport</option>
@@ -77,27 +87,27 @@
           </div>
           <div class="field">
             <label>Numéro d'identité *</label>
-            <input name="numero_identite" placeholder="AB123456"/>
+            <input id="edit-numero-identite" name="numero_identite"/>
           </div>
           <div class="field">
             <label>Nationalité</label>
-            <input name="nationalite" placeholder="Marocaine"/>
+            <input id="edit-nationalite" name="nationalite"/>
           </div>
           <div class="field">
             <label>Profession</label>
-            <input name="profession" placeholder="Profession"/>
+            <input id="edit-profession" name="profession"/>
           </div>
           <div class="field">
             <label>Date de naissance</label>
-            <input name="date_naissance" type="date"/>
+            <input id="edit-date-naissance" name="date_naissance" type="date"/>
           </div>
           <div class="field">
             <label>Lieu de naissance</label>
-            <input name="lieu_naissance" placeholder="Casablanca"/>
+            <input id="edit-lieu-naissance" name="lieu_naissance"/>
           </div>
           <div class="field">
             <label>Situation familiale</label>
-            <select name="situation_familiale">
+            <select id="edit-situation-familiale" name="situation_familiale">
               <option value="">--</option>
               <option value="Célibataire">Célibataire</option>
               <option value="Marié">Marié(e)</option>
@@ -109,7 +119,7 @@
       </div>
 
       <!-- ── Personne morale ── -->
-      <div id="section-morale" style="display:none">
+      <div id="edit-section-morale" style="display:none">
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;
                     color:var(--text3);margin-bottom:10px;font-weight:500">
           Société
@@ -117,15 +127,15 @@
         <div class="form-grid" style="margin-bottom:12px">
           <div class="field full">
             <label>Raison sociale *</label>
-            <input name="raison_sociale" placeholder="Nom de l'entreprise"/>
+            <input id="edit-raison-sociale" name="raison_sociale"/>
           </div>
           <div class="field">
             <label>Sigle</label>
-            <input name="sigle" placeholder="SARL, SA..."/>
+            <input id="edit-sigle" name="sigle"/>
           </div>
           <div class="field">
             <label>Type de société</label>
-            <select name="type_societe">
+            <select id="edit-type-societe" name="type_societe">
               <option value="">--</option>
               <option value="SARL">SARL</option>
               <option value="SA">Société Anonyme</option>
@@ -138,23 +148,27 @@
           </div>
           <div class="field">
             <label>N° Registre de Commerce</label>
-            <input name="numero_rc" placeholder="RC-XXXXX"/>
+            <input id="edit-numero-rc" name="numero_rc"/>
           </div>
           <div class="field">
             <label>ICE</label>
-            <input name="ice" placeholder="Identifiant commun entreprise"/>
+            <input id="edit-ice" name="ice"/>
           </div>
           <div class="field">
             <label>Identifiant fiscal</label>
-            <input name="identifiant_fiscal" placeholder="IF-XXXXX"/>
+            <input id="edit-identifiant-fiscal" name="identifiant_fiscal"/>
           </div>
           <div class="field">
             <label>N° Patente</label>
-            <input name="numero_patente" placeholder="Patente"/>
+            <input id="edit-numero-patente" name="numero_patente"/>
+          </div>
+          <div class="field">
+            <label>N° CNSS</label>
+            <input id="edit-numero-cnss" name="numero_cnss"/>
           </div>
           <div class="field">
             <label>Capital social (MAD)</label>
-            <input name="capital_social" type="number" placeholder="100000"/>
+            <input id="edit-capital-social" name="capital_social" type="number"/>
           </div>
         </div>
 
@@ -165,39 +179,32 @@
         <div class="form-grid">
           <div class="field">
             <label>Nom</label>
-            <input name="representant_nom" placeholder="Nom du représentant"/>
+            <input id="edit-representant-nom" name="representant_nom"/>
           </div>
           <div class="field">
             <label>Prénom</label>
-            <input name="representant_prenom" placeholder="Prénom"/>
+            <input id="edit-representant-prenom" name="representant_prenom"/>
           </div>
           <div class="field">
             <label>Fonction</label>
-            <input name="representant_fonction" placeholder="Gérant, PDG..."/>
+            <input id="edit-representant-fonction" name="representant_fonction"/>
           </div>
           <div class="field">
             <label>Date création société</label>
-            <input name="date_creation_societe" type="date"/>
+            <input id="edit-date-creation-societe"
+                   name="date_creation_societe" type="date"/>
           </div>
         </div>
       </div>
 
     </div>
+
     <div class="modal-foot">
-      <button type="button" class="btn btn-ghost" onclick="closeModal()">Annuler</button>
-      <button type="submit" class="btn btn-primary">Créer le client</button>
+      <button type="button" class="btn btn-ghost"
+              onclick="closeModal()">Annuler</button>
+      <button type="submit" class="btn btn-primary"
+              id="edit-btn-submit">Enregistrer</button>
     </div>
+
   </form>
 </div>
-
-<script>
-function setTypeClient(type) {
-  document.getElementById('type_client').value = type;
-  document.getElementById('section-physique').style.display = type === 'physique' ? 'block' : 'none';
-  document.getElementById('section-morale').style.display   = type === 'morale'   ? 'block' : 'none';
-  document.getElementById('btn-type-physique').className =
-    'btn ' + (type === 'physique' ? 'btn-primary' : 'btn-ghost');
-  document.getElementById('btn-type-morale').className =
-    'btn ' + (type === 'morale'   ? 'btn-primary' : 'btn-ghost');
-}
-</script>

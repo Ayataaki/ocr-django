@@ -23,8 +23,4 @@ class Document(models.Model):
 
     upload_par = models.ForeignKey('accounts.Utilisateur', on_delete=models.SET_NULL, null=True)
 
-    date_indexation = models.DateTimeField(auto_now_add=True)
-
     date_creation = models.DateTimeField(auto_now_add=True)
-
-    date_modification = models.DateTimeField(auto_now=True)

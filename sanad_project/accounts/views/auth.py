@@ -8,6 +8,7 @@ def login_view(request):
     if request.method == "POST":
         username = request.POST.get("nom_utilisateur")
         password = request.POST.get("mot_de_passe")
+        user_id = request.POST.get("user_id") 
 
         if not username or not password:
             messages.error(request, "Nom d'utilisateur et mot de passe sont obligatoires.")
@@ -22,6 +23,17 @@ def login_view(request):
         if not user.est_actif:
             messages.error(request, "Compte désactivé.")
             return render(request, "auth/login.html")
+        
+        if user_id and str(user.id) == user_id:
+            role = user.role.nom
+            # tu peux rediriger selon le rôle
+            if role == "admin":
+                return redirect("admin_dashboard")
+            elif role == "operateur":
+                return redirect("operateur_dashboard")
+            elif role == "superviseur":
+                return render(request, "auth/login.html")
+
 
 # accounts/templates/accounts/operateur/dashboard.html
 

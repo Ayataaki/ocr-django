@@ -1,0 +1,774 @@
+<!-- ENHANCED PANEL: Recherche documentaire -->
+<div class="panel {% if active_panel == 'recherche' %}active{% endif %}" id="panel-recherche">
+    <div class="card">
+        <div class="card-body">
+            <!-- Modernized Header -->
+            <div class="enhanced-section-header">
+                <div class="enhanced-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <div class="enhanced-section-text">
+                    <span class="enhanced-section-title">Recherche documentaire</span>
+                    <span class="enhanced-section-subtitle">Recherchez par mots-clés, mentions OCR ou métadonnées</span>
+                </div>
+            </div>
+
+            <!-- Search Filters Card -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <line x1="4" y1="21" x2="4" y2="14"/>
+                        <line x1="4" y1="10" x2="4" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12" y2="3"/>
+                        <line x1="20" y1="21" x2="20" y2="16"/>
+                        <line x1="20" y1="12" x2="20" y2="3"/>
+                        <line x1="4" y1="14" x2="8" y2="14"/>
+                        <line x1="12" y1="12" x2="16" y2="12"/>
+                        <line x1="20" y1="16" x2="22" y2="16"/>
+                    </svg>
+                    Filtres de recherche
+                </div>
+                
+                <!-- Search Input with Icon -->
+                <div class="field full-width" style="margin-bottom: 20px;">
+                    <label>Recherche libre</label>
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input id="main-search" 
+                               class="search-input" 
+                               placeholder="Nom, acte, référence, titre foncier, mot-clé OCR..." 
+                               onkeydown="if(event.key==='Enter')doSearch(this.value)"/>
+                    </div>
+                </div>
+
+                <!-- Filter Grid -->
+                <div class="form-grid cols3">
+                    <div class="field">
+                        <label>Type de document</label>
+                        <select id="document-type" class="modern-select">
+                            <option value="all">Tous les types</option>
+                            <option value="notarie">Acte notarié</option>
+                            <option value="foncier">Titre foncier</option>
+                            <option value="contrat">Contrat de vente</option>
+                            <option value="procuration">Procuration</option>
+                            <option value="testament">Testament</option>
+                        </select>
+                    </div>
+                    
+                    <div class="field">
+                        <label>Période</label>
+                        <select id="period" class="modern-select">
+                            <option value="all">Toute la période</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                            <option value="year">Cette année</option>
+                        </select>
+                    </div>
+                    
+                    <div class="field">
+                        <label>Statut</label>
+                        <select id="status" class="modern-select">
+                            <option value="all">Tous les statuts</option>
+                            <option value="traite">Traité</option>
+                            <option value="en_cours">En cours</option>
+                            <option value="en_attente">En attente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="search-actions">
+                    <button class="btn btn-primary" onclick="doSearch(document.getElementById('main-search').value)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        Rechercher
+                    </button>
+                    <button class="btn btn-ghost" onclick="resetSearch()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M3 12a9 9 0 1 0 9-9m-3 6 3-3-3-3"/>
+                            <path d="M6 3h6v6"/>
+                        </svg>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results Section -->
+    <div id="search-results" style="display: none;">
+        <div class="card">
+            <div class="card-body">
+                <div class="results-header">
+                    <div id="results-count" class="results-count"></div>
+                    <div class="results-actions">
+                        <button class="btn-icon-only" onclick="exportResults()" title="Exporter les résultats">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </button>
+                        <button class="btn-icon-only" onclick="printResults()" title="Imprimer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M6 9V3h12v6"/>
+                                <path d="M6 21h12v-6H6z"/>
+                                <path d="M18 9v6H6V9z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="results-list" class="results-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="search-empty" class="empty-state">
+        <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </div>
+        <p class="empty-state-title">Recherche documentaire</p>
+        <p class="empty-state-subtitle">Utilisez les filtres ci-dessus pour trouver des documents</p>
+        <div class="empty-state-tips">
+            <span class="tip-badge">Recherche par nom</span>
+            <span class="tip-badge">Recherche par référence</span>
+            <span class="tip-badge">Recherche OCR</span>
+            <span class="tip-badge">Filtrage par période</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ============================================
+       ENHANCED RECHERCHE PANEL CSS
+       Styles cohérents avec l'ensemble
+    ============================================ */
+
+    /* Form Grid 3 Columns */
+    .form-grid.cols3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    /* Search Actions */
+    .search-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    /* Results Header */
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+    .results-count {
+        font-size: 13px;
+        color: var(--text2);
+        font-weight: 500;
+    }
+    .results-count strong {
+        color: var(--accent);
+        font-size: 15px;
+    }
+    .results-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-icon-only {
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        padding: 6px 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text2);
+    }
+    .btn-icon-only:hover {
+        background: var(--bg4);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    /* Results List */
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .result-item {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        animation: fadeInUp 0.3s ease;
+    }
+    .result-item:hover {
+        border-color: var(--accent);
+        transform: translateX(4px);
+        background: var(--bg4);
+    }
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .result-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+    }
+    .result-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .result-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .result-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text2);
+    }
+    .result-detail-item svg {
+        width: 14px;
+        height: 14px;
+        stroke: var(--text3);
+        flex-shrink: 0;
+    }
+    .result-excerpt {
+        font-size: 12px;
+        color: var(--text3);
+        line-height: 1.5;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+    }
+    .result-keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+        background: var(--bg2);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        margin-top: 16px;
+    }
+    .empty-state-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 20px;
+        background: var(--bg3);
+        border-radius: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .empty-state-icon svg {
+        width: 32px;
+        height: 32px;
+        stroke: var(--text3);
+    }
+    .empty-state-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+    .empty-state-subtitle {
+        font-size: 13px;
+        color: var(--text2);
+        margin-bottom: 20px;
+    }
+    .empty-state-tips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 16px;
+    }
+    .tip-badge {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        color: var(--text2);
+        transition: all 0.2s ease;
+    }
+    .tip-badge:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+        cursor: pointer;
+    }
+
+    /* Loading State */
+    .loading-state {
+        text-align: center;
+        padding: 40px;
+    }
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 16px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    .loading-text {
+        font-size: 13px;
+        color: var(--text2);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* No Results */
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: var(--text3);
+    }
+    .no-results svg {
+        width: 48px;
+        height: 48px;
+        stroke: var(--border2);
+        margin-bottom: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-grid.cols3 {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .results-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .result-header {
+            flex-direction: column;
+        }
+        .result-details {
+            grid-template-columns: 1fr;
+        }
+        .empty-state {
+            padding: 40px 20px;
+        }
+    }
+</style>
+
+<script>
+    // Global variable to store current search results
+    let currentResults = [];
+
+    function doSearch(query) {
+        const searchTerm = query || document.getElementById('main-search').value;
+        const documentType = document.getElementById('document-type').value;
+        const period = document.getElementById('period').value;
+        const status = document.getElementById('status').value;
+        
+        // Show loading state
+        showLoadingState();
+        
+        // Build search parameters
+        const searchParams = new URLSearchParams({
+            q: searchTerm,
+            type: documentType,
+            period: period,
+            status: status
+        });
+        
+        // Simulate API call (replace with actual fetch)
+        setTimeout(() => {
+            // Mock data for demonstration
+            const mockResults = generateMockResults(searchTerm);
+            displayResults(mockResults);
+        }, 800);
+        
+        // Actual API call (uncomment when backend is ready)
+        /*
+        fetch(`/api/documents/search/?${searchParams.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data.results);
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                showErrorState();
+            });
+        */
+    }
+    
+    function generateMockResults(searchTerm) {
+        const mockData = [
+            {
+                id: 1,
+                title: "Acte de vente - BENALI Mohamed",
+                reference: "DN-2026-0142",
+                type: "Acte notarié",
+                date: "2026-04-06",
+                client: "BENALI Mohamed",
+                notary: "Me. Harraqi El Mahdi",
+                excerpt: "Vente d'un appartement situé à Casablanca, montant de 2 500 000 MAD...",
+                keywords: ["vente", "appartement", "Casablanca", "2.5M MAD"],
+                status: "traite"
+            },
+            {
+                id: 2,
+                title: "Titre foncier - TF-45871",
+                reference: "TF-45871",
+                type: "Titre foncier",
+                date: "2026-03-15",
+                client: "BENALI Fatima",
+                notary: "Me. Bennani Youssef",
+                excerpt: "Titre foncier pour la propriété située au quartier Maârif, Casablanca...",
+                keywords: ["titre foncier", "Maârif", "propriété"],
+                status: "en_cours"
+            },
+            {
+                id: 3,
+                title: "Contrat de vente - ALAMI Rachid",
+                reference: "DN-2026-0089",
+                type: "Contrat de vente",
+                date: "2026-02-28",
+                client: "ALAMI Rachid",
+                notary: "Me. Harraqi El Mahdi",
+                excerpt: "Vente d'un terrain à Bouskoura, superficie 500m²...",
+                keywords: ["terrain", "vente", "Bouskoura"],
+                status: "traite"
+            }
+        ];
+        
+        // Filter by search term if provided
+        if (searchTerm && searchTerm.trim() !== "") {
+            return mockData.filter(item => 
+                item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.keywords.some(k => k.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+        
+        return mockData;
+    }
+    
+    function showLoadingState() {
+        const resultsDiv = document.getElementById('search-results');
+        const emptyDiv = document.getElementById('search-empty');
+        const resultsList = document.getElementById('results-list');
+        
+        emptyDiv.style.display = 'none';
+        resultsDiv.style.display = 'block';
+        
+        resultsList.innerHTML = `
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Recherche en cours...</div>
+            </div>
+        `;
+    }
+    
+    function displayResults(results) {
+        const resultsDiv = document.getElementById('search-results');
+        const emptyDiv = document.getElementById('search-empty');
+        const resultsList = document.getElementById('results-list');
+        const resultsCount = document.getElementById('results-count');
+        
+        currentResults = results;
+        
+        if (results.length === 0) {
+            resultsDiv.style.display = 'none';
+            emptyDiv.style.display = 'block';
+            emptyDiv.innerHTML = `
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <p class="empty-state-title">Aucun résultat trouvé</p>
+                <p class="empty-state-subtitle">Essayez d'autres mots-clés ou modifiez vos filtres</p>
+                <div class="empty-state-tips">
+                    <span class="tip-badge" onclick="suggestSearch('vente')">Rechercher "vente"</span>
+                    <span class="tip-badge" onclick="suggestSearch('titre foncier')">Rechercher "titre foncier"</span>
+                    <span class="tip-badge" onclick="suggestSearch('BENALI')">Rechercher "BENALI"</span>
+                </div>
+            `;
+            return;
+        }
+        
+        resultsDiv.style.display = 'block';
+        emptyDiv.style.display = 'none';
+        
+        resultsCount.innerHTML = `<strong>${results.length}</strong> document${results.length > 1 ? 's' : ''} trouvé${results.length > 1 ? 's' : ''}`;
+        
+        resultsList.innerHTML = results.map(doc => `
+            <div class="result-item" onclick="viewDocument(${doc.id})">
+                <div class="result-header">
+                    <div class="result-title">${escapeHtml(doc.title)}</div>
+                    <div class="result-badges">
+                        <span class="badge ${getStatusBadgeClass(doc.status)}">${getStatusLabel(doc.status)}</span>
+                        <span class="badge badge-gray">${doc.type}</span>
+                    </div>
+                </div>
+                <div class="result-details">
+                    <div class="result-detail-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <span>Réf: ${doc.reference}</span>
+                    </div>
+                    <div class="result-detail-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <span>${formatDate(doc.date)}</span>
+                    </div>
+                    <div class="result-detail-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>${escapeHtml(doc.client)}</span>
+                    </div>
+                </div>
+                <div class="result-excerpt">
+                    ${escapeHtml(doc.excerpt)}
+                </div>
+                <div class="result-keywords">
+                    ${doc.keywords.map(kw => `<span class="keyword-tag" onclick="event.stopPropagation();searchKeyword('${kw}')">${escapeHtml(kw)}</span>`).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function getStatusBadgeClass(status) {
+        switch(status) {
+            case 'traite': return 'badge-green';
+            case 'en_cours': return 'badge-blue';
+            case 'en_attente': return 'badge-amber';
+            default: return 'badge-gray';
+        }
+    }
+    
+    function getStatusLabel(status) {
+        switch(status) {
+            case 'traite': return 'Traité';
+            case 'en_cours': return 'En cours';
+            case 'en_attente': return 'En attente';
+            default: return status;
+        }
+    }
+    
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function resetSearch() {
+        document.getElementById('main-search').value = '';
+        document.getElementById('document-type').value = 'all';
+        document.getElementById('period').value = 'all';
+        document.getElementById('status').value = 'all';
+        
+        const resultsDiv = document.getElementById('search-results');
+        const emptyDiv = document.getElementById('search-empty');
+        
+        resultsDiv.style.display = 'none';
+        emptyDiv.style.display = 'block';
+        emptyDiv.innerHTML = `
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </div>
+            <p class="empty-state-title">Recherche documentaire</p>
+            <p class="empty-state-subtitle">Utilisez les filtres ci-dessus pour trouver des documents</p>
+            <div class="empty-state-tips">
+                <span class="tip-badge">Recherche par nom</span>
+                <span class="tip-badge">Recherche par référence</span>
+                <span class="tip-badge">Recherche OCR</span>
+                <span class="tip-badge">Filtrage par période</span>
+            </div>
+        `;
+    }
+    
+    function viewDocument(docId) {
+        console.log('View document:', docId);
+        // Implement document view logic
+        alert(`Ouverture du document ${docId}`);
+    }
+    
+    function searchKeyword(keyword) {
+        document.getElementById('main-search').value = keyword;
+        doSearch(keyword);
+    }
+    
+    function suggestSearch(term) {
+        document.getElementById('main-search').value = term;
+        doSearch(term);
+    }
+    
+    function exportResults() {
+        if (currentResults.length === 0) {
+            alert('Aucun résultat à exporter');
+            return;
+        }
+        
+        // Simple CSV export
+        const headers = ['Titre', 'Référence', 'Type', 'Date', 'Client', 'Statut'];
+        const csvData = currentResults.map(doc => [
+            `"${doc.title}"`,
+            doc.reference,
+            doc.type,
+            doc.date,
+            `"${doc.client}"`,
+            getStatusLabel(doc.status)
+        ]);
+        
+        const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', 'recherche_documents.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    
+    function printResults() {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Résultats de recherche</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; }
+                        h1 { color: #333; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Résultats de recherche</h1>
+                    <p>${currentResults.length} document(s) trouvé(s)</p>
+                    <table>
+                        <thead>
+                            <tr><th>Titre</th><th>Référence</th><th>Type</th><th>Date</th><th>Client</th><th>Statut</th></tr>
+                        </thead>
+                        <tbody>
+                            ${currentResults.map(doc => `
+                                <tr>
+                                    <td>${doc.title}</td>
+                                    <td>${doc.reference}</td>
+                                    <td>${doc.type}</td>
+                                    <td>${doc.date}</td>
+                                    <td>${doc.client}</td>
+                                    <td>${getStatusLabel(doc.status)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+    
+    function showErrorState() {
+        const resultsDiv = document.getElementById('search-results');
+        const resultsList = document.getElementById('results-list');
+        
+        resultsDiv.style.display = 'block';
+        resultsList.innerHTML = `
+            <div class="empty-state" style="margin: 0;">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <circle cx="12" cy="16" r="1"/>
+                    </svg>
+                </div>
+                <p class="empty-state-title">Erreur de recherche</p>
+                <p class="empty-state-subtitle">Une erreur est survenue lors de la recherche. Veuillez réessayer.</p>
+            </div>
+        `;
+    }
+</script>

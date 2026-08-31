@@ -1,1 +1,1 @@
-from accounts.modules import Utilisateur, Session, Adresse, Role, Audit, Client
+from accounts.modules import Utilisateur, Session, Role, Audit, Client

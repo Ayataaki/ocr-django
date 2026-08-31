@@ -1,59 +1,181 @@
-<div class="modal" id="modal-add-client" style="display:none">
+<div class="modal" id="modal-add-client">
   <div class="modal-head">
     <h3>Nouveau client</h3>
     <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
   </div>
 
-
-
-  <form method="POST" action="{% url 'ajout_client_admin' %}">
+  <form method="POST" action="{% url 'ajout_client_admin' %}" id="form-add-client">
     {% csrf_token %}
     <div class="modal-body">
-      <div class="form-grid">
 
+      <!-- Sélecteur de type -->
+      <div class="select-type">
+        <button type="button" id="btn-type-physique" class="btn btn-primary"
+                onclick="setTypeClient('physique')">
+          Personne physique
+        </button>
+        <button type="button" id="btn-type-morale" class="btn btn-ghost" 
+                onclick="setTypeClient('morale')">
+          Personne morale
+        </button>
+        <input type="hidden" name="type_client" id="type_client" value="physique"/>
+      </div>
+
+      <!-- Champs communs -->
+      <div class="common-field">
+        Coordonnées
+      </div>
+      <div class="form-grid">
         <div class="field">
-          <label>Nom</label>
-          <input name="nom" placeholder="Nom de famille" required/>
-        </div>
-        <div class="field">
-          <label>Prénom</label>
-          <input name="prenom" placeholder="Prénom"/>
-        </div>
-        <div class="field">
-          <label>Type d'identité</label>
-          <select name="type_identite" required>
-            <option value="">-- Choisir --</option>
-            <option value="CIN">CIN</option>
-            <option value="Passeport">Passeport</option>
-            <option value="RC">RC (société)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Numéro d'identité</label>
-          <input name="numero_identite" placeholder="AB123456" required/>
+          <label>Email *</label>
+          <input name="email" type="email" placeholder="email@exemple.ma" required/>
         </div>
         <div class="field">
           <label>Téléphone</label>
           <input name="telephone" placeholder="06 XX XX XX XX"/>
         </div>
-        <div class="field">
-          <label>Email</label>
-          <input name="email" type="email" placeholder="email@exemple.ma" required/>
-        </div>
-        <div class="field">
-          <label>Profession</label>
-          <input name="profession" placeholder="Profession"/>
-        </div>
-        <div class="field">
-          <label>Date de naissance</label>
-          <input name="date_naissance" type="date"/>
-        </div>
         <div class="field full">
           <label>Adresse</label>
           <input name="adresse" placeholder="Adresse complète"/>
         </div>
-
+        <div class="field">
+          <label>Ville</label>
+          <input name="ville" placeholder="Casablanca"/>
+        </div>
+        <div class="field">
+          <label>Pays</label>
+          <input name="pays" value="Maroc"/>
+        </div>
       </div>
+
+      <!-- ── Personne physique ── -->
+      <div id="section-physique">
+        <div class="common-field">
+          Identité
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Nom *</label>
+            <input name="nom" placeholder="Nom de famille"/>
+          </div>
+          <div class="field">
+            <label>Prénom *</label>
+            <input name="prenom" placeholder="Prénom"/>
+          </div>
+          <div class="field">
+            <label>Type d'identité *</label>
+            <select name="type_identite">
+              <option value="">-- Choisir --</option>
+              <option value="CIN">CIN</option>
+              <option value="Passeport">Passeport</option>
+              <option value="Carte séjour">Carte de séjour</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Numéro d'identité *</label>
+            <input name="numero_identite" placeholder="AB123456"/>
+          </div>
+          <div class="field">
+            <label>Nationalité</label>
+            <input name="nationalite" placeholder="Marocaine"/>
+          </div>
+          <div class="field">
+            <label>Profession</label>
+            <input name="profession" placeholder="Profession"/>
+          </div>
+          <div class="field">
+            <label>Date de naissance</label>
+            <input name="date_naissance" type="date"/>
+          </div>
+          <div class="field">
+            <label>Lieu de naissance</label>
+            <input name="lieu_naissance" placeholder="Casablanca"/>
+          </div>
+          <div class="field">
+            <label>Situation familiale</label>
+            <select name="situation_familiale">
+              <option value="">--</option>
+              <option value="Célibataire">Célibataire</option>
+              <option value="Marié">Marié(e)</option>
+              <option value="Divorcé">Divorcé(e)</option>
+              <option value="Veuf">Veuf/Veuve</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Personne morale ── -->
+      <div id="section-morale" style="display:none">
+        <div class="common-field">
+          Société
+        </div>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Raison sociale *</label>
+            <input name="raison_sociale" placeholder="Nom de l'entreprise"/>
+          </div>
+          <div class="field">
+            <label>Sigle</label>
+            <input name="sigle" placeholder="SARL, SA..."/>
+          </div>
+          <div class="field">
+            <label>Type de société</label>
+            <select name="type_societe">
+              <option value="">--</option>
+              <option value="SARL">SARL</option>
+              <option value="SA">Société Anonyme</option>
+              <option value="SAS">SAS</option>
+              <option value="SNC">SNC</option>
+              <option value="SCI">SCI</option>
+              <option value="Association">Association</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>N° Registre de Commerce</label>
+            <input name="numero_rc" placeholder="RC-XXXXX"/>
+          </div>
+          <div class="field">
+            <label>ICE</label>
+            <input name="ice" placeholder="Identifiant commun entreprise"/>
+          </div>
+          <div class="field">
+            <label>Identifiant fiscal</label>
+            <input name="identifiant_fiscal" placeholder="IF-XXXXX"/>
+          </div>
+          <div class="field">
+            <label>N° Patente</label>
+            <input name="numero_patente" placeholder="Patente"/>
+          </div>
+          <div class="field">
+            <label>Capital social (MAD)</label>
+            <input name="capital_social" type="number" placeholder="100000"/>
+          </div>
+        </div>
+
+        <div class="common-field">
+          Représentant légal
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Nom</label>
+            <input name="representant_nom" placeholder="Nom du représentant"/>
+          </div>
+          <div class="field">
+            <label>Prénom</label>
+            <input name="representant_prenom" placeholder="Prénom"/>
+          </div>
+          <div class="field">
+            <label>Fonction</label>
+            <input name="representant_fonction" placeholder="Gérant, PDG..."/>
+          </div>
+          <div class="field">
+            <label>Date création société</label>
+            <input name="date_creation_societe" type="date"/>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div class="modal-foot">
       <button type="button" class="btn btn-ghost" onclick="closeModal()">Annuler</button>
@@ -61,3 +183,15 @@
     </div>
   </form>
 </div>
+
+<script>
+function setTypeClient(type) {
+  document.getElementById('type_client').value = type;
+  document.getElementById('section-physique').style.display = type === 'physique' ? 'block' : 'none';
+  document.getElementById('section-morale').style.display   = type === 'morale'   ? 'block' : 'none';
+  document.getElementById('btn-type-physique').className =
+    'btn ' + (type === 'physique' ? 'btn-primary' : 'btn-ghost');
+  document.getElementById('btn-type-morale').className =
+    'btn ' + (type === 'morale'   ? 'btn-primary' : 'btn-ghost');
+}
+</script>

@@ -1,0 +1,157 @@
+<div class="modal" id="modal-voir-client" style="display:none;max-width:600px">
+  <div class="modal-head">
+    <h3 id="voir-modal-titre">Détail client</h3>
+    <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+  </div>
+
+  <div class="modal-body">
+
+    <!-- Sélecteur de type — lecture seule -->
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <button type="button" id="voir-btn-physique"
+              class="btn btn-primary" style="flex:1" disabled>
+        Personne physique
+      </button>
+      <button type="button" id="voir-btn-morale"
+              class="btn btn-ghost" style="flex:1" disabled>
+        Personne morale
+      </button>
+    </div>
+
+    <!-- Coordonnées -->
+    <div class="form-section-label">Coordonnées</div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="field">
+        <label>Email</label>
+        <input id="voir-email" name="email" type="email" readonly/>
+      </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input id="voir-telephone" readonly/>
+      </div>
+      <div class="field full">
+        <label>Adresse</label>
+        <input id="voir-adresse" readonly/>
+      </div>
+      <div class="field">
+        <label>Ville</label>
+        <input id="voir-ville" readonly/>
+      </div>
+      <div class="field">
+        <label>Pays</label>
+        <input id="voir-pays" readonly/>
+      </div>
+    </div>
+
+    <!-- Personne physique -->
+    <div id="voir-section-physique">
+      <div class="form-section-label">Identité</div>
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="field">
+          <label>Nom</label>
+          <input id="voir-nom" readonly/>
+        </div>
+        <div class="field">
+          <label>Prénom</label>
+          <input id="voir-prenom" readonly/>
+        </div>
+        <div class="field">
+          <label>Type d'identité</label>
+          <input id="voir-type-identite" readonly/>
+        </div>
+        <div class="field">
+          <label>Numéro d'identité</label>
+          <input id="voir-numero-identite" readonly/>
+        </div>
+        <div class="field">
+          <label>Nationalité</label>
+          <input id="voir-nationalite" readonly/>
+        </div>
+        <div class="field">
+          <label>Profession</label>
+          <input id="voir-profession" readonly/>
+        </div>
+        <div class="field">
+          <label>Date de naissance</label>
+          <input id="voir-date-naissance" type="date" readonly/>
+        </div>
+        <div class="field">
+          <label>Lieu de naissance</label>
+          <input id="voir-lieu-naissance" readonly/>
+        </div>
+        <div class="field">
+          <label>Situation familiale</label>
+          <input id="voir-situation-familiale" readonly/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personne morale -->
+    <div id="voir-section-morale" style="display:none">
+      <div class="form-section-label">Société</div>
+      <div class="form-grid" style="margin-bottom:12px">
+        <div class="field full">
+          <label>Raison sociale</label>
+          <input id="voir-raison-sociale" readonly/>
+        </div>
+        <div class="field">
+          <label>Sigle</label>
+          <input id="voir-sigle" readonly/>
+        </div>
+        <div class="field">
+          <label>Type de société</label>
+          <input id="voir-type-societe" readonly/>
+        </div>
+        <div class="field">
+          <label>N° Registre de Commerce</label>
+          <input id="voir-numero-rc" readonly/>
+        </div>
+        <div class="field">
+          <label>ICE</label>
+          <input id="voir-ice" readonly/>
+        </div>
+        <div class="field">
+          <label>Identifiant fiscal</label>
+          <input id="voir-identifiant-fiscal" readonly/>
+        </div>
+        <div class="field">
+          <label>N° Patente</label>
+          <input id="voir-numero-patente" readonly/>
+        </div>
+        <div class="field">
+          <label>Capital social</label>
+          <input id="voir-capital-social" readonly/>
+        </div>
+      </div>
+
+      <div class="form-section-label">Représentant légal</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nom</label>
+          <input id="voir-representant-nom" readonly/>
+        </div>
+        <div class="field">
+          <label>Prénom</label>
+          <input id="voir-representant-prenom" readonly/>
+        </div>
+        <div class="field">
+          <label>Fonction</label>
+          <input id="voir-representant-fonction" readonly/>
+        </div>
+        <div class="field">
+          <label>Date création société</label>
+          <input id="voir-date-creation-societe" type="date" readonly/>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-foot">
+    <button type="button" class="btn btn-ghost" onclick="closeModal()">Fermer</button>
+    <button type="button" class="btn btn-primary"
+            id="voir-btn-modifier" onclick="passerEnModeModification()">
+      ✎ Modifier
+    </button>
+  </div>
+</div>

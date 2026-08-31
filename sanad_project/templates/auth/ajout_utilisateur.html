@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANAD Digital - Administration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+    /* Mode clair */
+    body.light-mode {
+      background-color: #f8f9fa;
+      color: #212529;
+    }
+
+    /* Mode sombre */
+    body.dark-mode {
+      background-color: #212529;
+      color: #f8f9fa;
+    }
+
+    .card {
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark-mode .card {
+      background-color: #343a40;
+      color: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container my-5">
+    
+    <div class="d-flex justify-content-end mb-3">
+      <button id="toggleTheme" class="btn btn-outline-secondary btn-sm">
+        🌙 Mode sombre
+      </button>
+    </div>
+
+    <div class="row justify-content-center">
+      <!-- Pour rendre le style responsive -->
+      <div class="col-md-10 col-lg-8">
+      <div class="card shadow-lg p-4">
+        <!-- <div class="col-lg-8">
+            <div class="card shadow-lg p-4"> -->
+                <h1 class="text-center mb-3">SANAD Digital</h1>
+                <p class="text-center text-muted">Formulaire d'ajout d'utilisateur</p>
+
+                {% if messages %}
+                  <div class="messages-container mt-3">
+                    {% for message in messages %}
+                      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <!-- <form method="POST"> -->
+        <form method="POST" action="{% url 'admin_creation' %}">
+          {% csrf_token %}
+
+          <!-- On va le générer automatiquement à partir du nom et prénom -->
+          <!-- <div class="field">
+            <label>Identifiant</label>
+            <input type="text" name="username" placeholder="nom.prenom"/>
+          </div> -->
+
+        <div class="field">
+            <label>Nom</label>
+            <input type="text" name="nom" placeholder="Votre nom"
+              pattern="[A-Za-zÀ-ÿ\s]+" 
+              title="Le nom doit contenir uniquement des lettres"/>
+        </div>
+
+        <div class="field">
+            <label>Prénom</label>
+            <input type="text" name="prenom" placeholder="Votre prénom"
+              pattern="[A-Za-zÀ-ÿ\s]+" 
+              title="Le prénom doit contenir uniquement des lettres"/>
+
+        </div>
+
+        <div class="field">
+            <label>CIN</label>
+            <input type="text" name="cin" placeholder="Votre CIN"
+              pattern="^[A-Za-z]{1,2}[0-9]{5,6}$" 
+              title="CIN marocain valide (ex: AB123456)"/>
+        </div>
+        
+        <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="votre.email@example.com"
+              pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" 
+              title="Veuillez entrer une adresse Gmail valide"/>
+        </div>
+        
+        <div class="field">
+            <label>Téléphone</label>
+            <input type="text" name="telephone" placeholder="Votre numéro de téléphone"
+              pattern="^(?:\+212[6-7][0-9]{8}|0[6-7][0-9]{8})$"
+              title="Numéro valide : +2126XXXXXXXX ou 06XXXXXXXX"/>
+        </div>
+
+
+<!--      <div class="field">
+            <label>Mot de passe</label>
+            <input type="password" name="mot_de_passe" placeholder="••••••••"/>
+          </div> -->
+
+          <div class="field">
+            <label>Mot de passe</label>
+            <input type="password" id="mot_de_passe" name="mot_de_passe" placeholder="••••••••" />
+            
+            <!-- <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="showPassword">
+              <label class="form-check-label" for="showPassword">
+                Afficher le mot de passe
+              </label>
+            </div> -->
+
+            <div class="form-check mt-1">
+              <input class="form-check-input" type="checkbox" id="showPassword" style="width: 1em; height: 1em;">
+              <label class="form-check-label small" for="showPassword" style="font-size: 0.85rem; color: white;">
+                Afficher le mot de passe
+              </label>
+            </div>
+
+          </div>
+
+
+        <div class="field">
+            <label>Rôle</label>
+            <select name="role">
+              {% for role in roles %}
+                <option value="{{ role.id }}">{{ role.nom }}</option>
+              {% empty %}
+                <option disabled>Aucun rôle disponible</option>
+              {% endfor %}
+            </select>
+        </div>
+
+          <button class="btn-primary" style="width:100%;margin-top:6px;padding:11px">
+            Ajouter l'utilisateur
+          </button>
+        </form>
+      </div>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const toggleBtn = document.getElementById("toggleTheme");
+  const body = document.body;
+
+  document.getElementById("showPassword").addEventListener("change", function() {
+    const pwdField = document.getElementById("mot_de_passe");
+    if (this.checked) {
+      pwdField.type = "text";   // afficher
+    } else {
+      pwdField.type = "password"; // masquer
+    }
+  });
+  // Charger préférence si déjà enregistrée
+  if(localStorage.getItem("theme") === "dark") {
+    body.classList.remove("light-mode");
+    body.classList.add("dark-mode");
+    toggleBtn.textContent = "☀️ Mode clair";
+  }
+
+  toggleBtn.addEventListener("click", () => {
+    if(body.classList.contains("light-mode")) {
+      body.classList.remove("light-mode");
+      body.classList.add("dark-mode");
+      toggleBtn.textContent = "☀️ Mode clair";
+      localStorage.setItem("theme", "dark");
+    } else {
+      body.classList.remove("dark-mode");
+      body.classList.add("light-mode");
+      toggleBtn.textContent = "🌙 Mode sombre";
+      localStorage.setItem("theme", "light");
+    }
+  });
+</script>
+</body>
+</html>
