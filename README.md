@@ -168,9 +168,3 @@ POST /api/create-dossier/
 Projet réalisé dans le cadre d’un système GED avancé avec Django.
 
 ---
-
-##  Licence
-
-Ce projet est open-source et libre d’utilisation.
-
-```
